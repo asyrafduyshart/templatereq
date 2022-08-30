@@ -1,0 +1,14 @@
+pp:
+  url: "https://httpbin.org/post"
+  method: "POST"
+  headers: 
+    - "Content-Type: application/x-www-form-urlencoded"
+  body: 
+    name: '$func("hash:test")'
+    surname: "test"
+pg:
+  url: "https://httpbin.org/post"
+  method: "POST"
+  headers: 
+    - "Content-Type: application/json"
+  body: '{"name":"John", "age":$func("hash:$TEST"), "car":null}'
