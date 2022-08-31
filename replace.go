@@ -17,7 +17,7 @@ func replaceByMap(t string, v map[string]string) string {
 }
 
 func funcName(t string) string {
-	left := `func("`
+	left := `$func("`
 	right := `")`
 	rx := regexp.MustCompile(`(?s)` + regexp.QuoteMeta(left) + `(.*?)` + regexp.QuoteMeta(right))
 	matches := rx.FindAllStringSubmatch(t, -1)
@@ -57,7 +57,6 @@ func funcHash(s string) string {
 	h := fnv.New32a()
 	h.Write([]byte(s))
 	res := fmt.Sprint(h.Sum32())
-	fmt.Println("hash", res)
 	return res
 }
 
