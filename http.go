@@ -44,5 +44,5 @@ func (ur *URLReq) RequestUrl() (*http.Response, error) {
 		var r = reflect.TypeOf(t)
 		fmt.Printf("Other:%v\n", r)
 	}
-	return nil, errors.New("Not Declared")
+	return nil, errors.New("not declared")
 }
