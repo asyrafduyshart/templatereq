@@ -106,5 +106,5 @@ func funcMd5(text string) string {
 //ALL
 
 func Replace(t string, v map[string]string) string {
-	return replaceByMap(replaceFuncWithValue(t), v)
+	return replaceByMap(replaceFuncWithValue(replaceByMap(t, v)), v)
 }
