@@ -21,7 +21,6 @@ func (c *URLReq) ReplaceRequest(r map[string]string) (*http.Response, error) {
 		body = Replace(v, r)
 	case map[string]interface{}:
 		var bdy = map[string]interface{}{}
-		fmt.Println(v)
 		for i, j := range v {
 			bdy[Replace(i, r)] = Replace(fmt.Sprintf("%v", j), r)
 		}
