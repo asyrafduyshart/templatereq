@@ -52,7 +52,7 @@ func funcSwitch(f, v string) string {
 	case "hash":
 		return funcHash(v)
 	case "md5":
-		return funcHash(v)
+		return funcMd5(v)
 	default:
 		return v
 	}
