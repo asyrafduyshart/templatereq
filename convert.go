@@ -32,8 +32,6 @@ func (c *URLReq) ReplaceRequest(r map[string]string) (*http.Response, error) {
 		body = c.Body
 	}
 
-	fmt.Println(c.Body)
-
 	rr := &URLReq{
 		Url:     Replace(c.Url, r),
 		Method:  c.Method,

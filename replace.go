@@ -1,9 +1,13 @@
 package templatereq
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"hash/fnv"
+	"net/url"
 	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -47,6 +51,8 @@ func funcSwitch(f, v string) string {
 	switch f {
 	case "hash":
 		return funcHash(v)
+	case "md5":
+		return funcHash(v)
 	default:
 		return v
 	}
@@ -67,6 +73,34 @@ func trimQuotes(s string) string {
 		}
 	}
 	return s
+}
+
+func funcSortKey(s map[string]string) map[string]string {
+	keys := make([]string, 0, len(s))
+	new := map[string]string{}
+	for k := range s {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		new[k] = s[k]
+	}
+	return new
+}
+
+func funcUrlEncode(m map[string]string) string {
+	params := url.Values{}
+	for k, v := range m {
+		params.Add(k, v)
+	}
+	r := params.Encode()
+	fmt.Println(r)
+	return r
+}
+
+func funcMd5(text string) string {
+	hash := md5.Sum([]byte(text))
+	return hex.EncodeToString(hash[:])
 }
 
 //ALL

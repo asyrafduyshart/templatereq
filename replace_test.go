@@ -84,3 +84,28 @@ func TestFuncReplaceMapJSON(t *testing.T) {
 		t.Errorf("got %v, want %v", expect, init)
 	}
 }
+
+func TestFuncSortKey(t *testing.T) {
+	funcSortKey(map[string]string{
+		"orange":     "1",
+		"apple":      "2",
+		"mango":      "3",
+		"strawberry": "4",
+	})
+}
+
+func TestFuncUrlEncode(t *testing.T) {
+	funcUrlEncode(
+		map[string]string{
+			"orange":     "1",
+			"apple":      "2",
+			"mango":      "3",
+			"strawberry": "4",
+		},
+	)
+}
+
+func TestFuncMD5(t *testing.T) {
+	r := "apple=2&mango=3&orange=1&strawberry=4"
+	funcMd5(r)
+}
