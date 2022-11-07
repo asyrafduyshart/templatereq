@@ -2,6 +2,7 @@ package templatereq
 
 import (
 	"crypto/md5"
+	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"hash/fnv"
@@ -53,6 +54,8 @@ func funcSwitch(f, v string) string {
 		return funcHash(v)
 	case "md5":
 		return funcMd5(v)
+	case "base64":
+		return funcBase64(v)
 	default:
 		return v
 	}
@@ -64,6 +67,11 @@ func funcHash(s string) string {
 	h.Write([]byte(s))
 	res := fmt.Sprint(h.Sum32())
 	return res
+}
+
+func funcBase64(text string) string {
+	hash := md5.Sum([]byte(text))
+	return base64.StdEncoding.EncodeToString(hash[:])
 }
 
 func trimQuotes(s string) string {
