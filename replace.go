@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -56,6 +57,8 @@ func funcSwitch(f, v string) string {
 		return funcMd5(v)
 	case "base64":
 		return funcBase64(v)
+	case "dateAdjust":
+		return funcNormalizeDateWithAdjustment(v)
 	default:
 		return v
 	}
@@ -72,6 +75,40 @@ func funcHash(s string) string {
 func funcBase64(text string) string {
 	hash := md5.Sum([]byte(text))
 	return base64.StdEncoding.EncodeToString(hash[:])
+}
+
+func funcNormalizeDateWithAdjustment(date string) string {
+	arr := strings.Split(date, "::")
+
+	if len(arr) > 1 {
+		datetime := arr[0]
+		adjustment := strings.Split(arr[1], "_")
+		durationtime, _ := strconv.Atoi(adjustment[1])
+		durationtype := adjustment[2]
+		if adjustment[0] == "add" {
+			switch durationtype {
+			case "minute":
+				date = AddDateInMinute(datetime, durationtime)
+			case "hour":
+				date = AddDateInHour(datetime, durationtime)
+			case "day":
+				date = AddDateInDay(datetime, durationtime)
+			}
+		} else if adjustment[0] == "subtract" {
+			switch durationtype {
+			case "minute":
+				date = SubtractDateInMinute(datetime, durationtime)
+			case "hour":
+				date = SubtractDateInHour(datetime, durationtime)
+			case "day":
+				date = SubtractDateInDay(datetime, durationtime)
+			}
+		}
+	} else {
+		date = FormatNormalDate(date)
+	}
+
+	return date
 }
 
 func trimQuotes(s string) string {

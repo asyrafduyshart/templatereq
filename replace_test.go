@@ -109,3 +109,21 @@ func TestFuncMD5(t *testing.T) {
 	r := "apple=2&mango=3&orange=1&strawberry=4"
 	funcMd5(r)
 }
+
+func TestFuncMD5Base64(t *testing.T) {
+	r := "apple=2&mango=3&orange=1&strawberry=4"
+	funcBase64(r)
+}
+
+func TestFuncNormalizeDateWithAdjustment(t *testing.T) {
+	// normal
+	replaceFuncWithValue(`$func("dateAdjust:2022-11-07T04:40:39Z")`)
+	// add
+	replaceFuncWithValue(`$func("dateAdjust:2022-11-07T04:40:39Z::add_5_minute")`)
+	replaceFuncWithValue(`$func("dateAdjust:2022-11-07T04:40:39Z::add_5_hour")`)
+	replaceFuncWithValue(`$func("dateAdjust:2022-11-07T04:40:39Z::add_5_day")`)
+	// subtract
+	replaceFuncWithValue(`$func("dateAdjust:2022-11-07T04:40:39Z::subtract_5_minute")`)
+	replaceFuncWithValue(`$func("dateAdjust:2022-11-07T04:40:39Z::subtract_5_hour")`)
+	replaceFuncWithValue(`$func("dateAdjust:2022-11-07T04:40:39Z::subtract_5_day")`)
+}
