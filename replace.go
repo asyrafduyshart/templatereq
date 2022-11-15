@@ -57,7 +57,7 @@ func funcSwitch(f, v string) string {
 		return funcMd5(v)
 	case "base64":
 		return funcBase64(v)
-	case "dateAdjust":
+	case "dateFormat":
 		return funcNormalizeDateWithAdjustment(v)
 	default:
 		return v
@@ -78,31 +78,30 @@ func funcBase64(text string) string {
 }
 
 func funcNormalizeDateWithAdjustment(date string) string {
-	arr := strings.Split(date, "::")
+	arr := make([]string, 0)
+	arrAdd := strings.Split(date, ":add:")
+	arrSub := strings.Split(date, ":subtract:")
+
+	if len(arrAdd) > 1 {
+		arr = arrAdd
+	} else if len(arrSub) > 1 {
+		arr = arrSub
+	}
 
 	if len(arr) > 1 {
 		datetime := arr[0]
-		adjustment := strings.Split(arr[1], "_")
-		durationtime, _ := strconv.Atoi(adjustment[1])
-		durationtype := adjustment[2]
-		if adjustment[0] == "add" {
-			switch durationtype {
-			case "minute":
-				date = AddDateInMinute(datetime, durationtime)
-			case "hour":
-				date = AddDateInHour(datetime, durationtime)
-			case "day":
-				date = AddDateInDay(datetime, durationtime)
-			}
-		} else if adjustment[0] == "subtract" {
-			switch durationtype {
-			case "minute":
-				date = SubtractDateInMinute(datetime, durationtime)
-			case "hour":
-				date = SubtractDateInHour(datetime, durationtime)
-			case "day":
-				date = SubtractDateInDay(datetime, durationtime)
-			}
+		durationcount := strings.Split(arr[1], "*")
+		durationtime := 1
+
+		for _, v := range durationcount {
+			i, _ := strconv.Atoi(v)
+			durationtime = durationtime * i
+		}
+
+		if len(arrAdd) > 1 {
+			date = AddDateInSecond(datetime, durationtime)
+		} else if len(arrSub) > 1 {
+			date = SubtractDateInSecond(datetime, durationtime)
 		}
 	} else {
 		date = FormatNormalDate(date)

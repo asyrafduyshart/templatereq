@@ -117,13 +117,13 @@ func TestFuncMD5Base64(t *testing.T) {
 
 func TestFuncNormalizeDateWithAdjustment(t *testing.T) {
 	// normal
-	replaceFuncWithValue(`$func("dateAdjust:2022-11-07T04:40:39Z")`)
-	// add
-	replaceFuncWithValue(`$func("dateAdjust:2022-11-07T04:40:39Z::add_5_minute")`)
-	replaceFuncWithValue(`$func("dateAdjust:2022-11-07T04:40:39Z::add_5_hour")`)
-	replaceFuncWithValue(`$func("dateAdjust:2022-11-07T04:40:39Z::add_5_day")`)
-	// subtract
-	replaceFuncWithValue(`$func("dateAdjust:2022-11-07T04:40:39Z::subtract_5_minute")`)
-	replaceFuncWithValue(`$func("dateAdjust:2022-11-07T04:40:39Z::subtract_5_hour")`)
-	replaceFuncWithValue(`$func("dateAdjust:2022-11-07T04:40:39Z::subtract_5_day")`)
+	replaceFuncWithValue(`$func("dateFormat:2022-11-07T04:40:39Z")`)
+	// add 5 min, 5 hour, 5 day
+	replaceFuncWithValue(`$func("dateFormat:2022-11-07T04:40:39Z:add:60*5")`)
+	replaceFuncWithValue(`$func("dateFormat:2022-11-07T04:40:39Z:add:60*60*5")`)
+	replaceFuncWithValue(`$func("dateFormat:2022-11-07T04:40:39Z:add:60*60*24*5")`)
+	// subtract 5 min, 5 hour, 5 day
+	replaceFuncWithValue(`$func("dateFormat:2022-11-07T04:40:39Z:subtract:60*5")`)
+	replaceFuncWithValue(`$func("dateFormat:2022-11-07T04:40:39Z:subtract:60*60*5")`)
+	replaceFuncWithValue(`$func("dateFormat:2022-11-07T04:40:39Z:subtract:60*60*24*5")`)
 }

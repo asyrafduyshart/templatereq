@@ -20,44 +20,16 @@ func FormatNormalDate(t string) string {
 	return normalDate
 }
 
-func AddDateInMinute(t string, n int) string {
+func AddDateInSecond(t string, n int) string {
 	date := parseStringToDateTime(t)
-	d1 := date.Add(time.Minute * time.Duration(n))
+	d1 := date.Add(time.Second * time.Duration(n))
 	d2 := d1.String()[0:19]
 	return d2
 }
 
-func AddDateInHour(t string, n int) string {
+func SubtractDateInSecond(t string, n int) string {
 	date := parseStringToDateTime(t)
-	d1 := date.Add(time.Hour * time.Duration(n))
-	d2 := d1.String()[0:19]
-	return d2
-}
-
-func AddDateInDay(t string, n int) string {
-	date := parseStringToDateTime(t)
-	d1 := date.AddDate(0, 0, n)
-	d2 := d1.String()[0:19]
-	return d2
-}
-
-func SubtractDateInMinute(t string, n int) string {
-	date := parseStringToDateTime(t)
-	d1 := date.Add(time.Minute * time.Duration(-n))
-	d2 := d1.String()[0:19]
-	return d2
-}
-
-func SubtractDateInHour(t string, n int) string {
-	date := parseStringToDateTime(t)
-	d1 := date.Add(time.Hour * time.Duration(-n))
-	d2 := d1.String()[0:19]
-	return d2
-}
-
-func SubtractDateInDay(t string, n int) string {
-	date := parseStringToDateTime(t)
-	d1 := date.AddDate(0, 0, -n)
+	d1 := date.Add(time.Second * time.Duration(-n))
 	d2 := d1.String()[0:19]
 	return d2
 }
