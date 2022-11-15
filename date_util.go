@@ -6,7 +6,7 @@ import (
 )
 
 func parseStringToDateTime(t string) time.Time {
-	dateString := "2006-01-02T15:04:05Z"
+	dateString := time.RFC3339
 	date, err := time.Parse(dateString, t)
 	if err != nil {
 		fmt.Println(err)
