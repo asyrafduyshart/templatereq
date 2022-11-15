@@ -6,8 +6,8 @@ import (
 )
 
 func parseStringToDateTime(t string) time.Time {
-	dateString := time.RFC3339
-	date, err := time.Parse(dateString, t)
+	dateFormat := time.RFC3339
+	date, err := time.Parse(dateFormat, t)
 	if err != nil {
 		fmt.Println(err)
 	}
