@@ -124,38 +124,42 @@ func TestFuncNormalizeDateWithAdjustment(t *testing.T) {
 		t.Errorf("got %v, want %v", expect, init)
 	}
 
-	// add 5 min, 5 hour, 5 day
+	// add 5 min
 	init = replaceFuncWithValue(`$func("dateFormat:2022-11-07T04:40:39Z:add:60*5")`)
 	expect = "2022-11-07 04:45:39"
 	if init != expect {
 		t.Errorf("got %v, want %v", expect, init)
 	}
 
+	// add 5 hour
 	init = replaceFuncWithValue(`$func("dateFormat:2022-11-07T04:40:39Z:add:60*60*5")`)
 	expect = "2022-11-07 09:40:39"
 	if init != expect {
 		t.Errorf("got %v, want %v", expect, init)
 	}
 
+	// add 5 day
 	init = replaceFuncWithValue(`$func("dateFormat:2022-11-07T04:40:39Z:add:60*60*24*5")`)
 	expect = "2022-11-12 04:40:39"
 	if init != expect {
 		t.Errorf("got %v, want %v", expect, init)
 	}
 
-	// subtract 5 min, 5 hour, 5 day
+	// subtract 5 min
 	init = replaceFuncWithValue(`$func("dateFormat:2022-11-07T04:40:39Z:subtract:60*5")`)
 	expect = "2022-11-07 04:35:39"
 	if init != expect {
 		t.Errorf("got %v, want %v", expect, init)
 	}
 
+	// subtract 5 hour
 	init = replaceFuncWithValue(`$func("dateFormat:2022-11-07T04:40:39Z:subtract:60*60*5")`)
 	expect = "2022-11-06 23:40:39"
 	if init != expect {
 		t.Errorf("got %v, want %v", expect, init)
 	}
 
+	// subtract 5 day
 	init = replaceFuncWithValue(`$func("dateFormat:2022-11-07T04:40:39Z:subtract:60*60*24*5")`)
 	expect = "2022-11-02 04:40:39"
 	if init != expect {
