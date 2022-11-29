@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -59,6 +60,8 @@ func funcSwitch(f, v string) string {
 		return funcBase64(v)
 	case "sha256":
 		return funcSha256(v)
+	case "dateFormat":
+		return funcNormalizeDateWithAdjustment(v)
 	default:
 		return v
 	}
@@ -75,6 +78,43 @@ func funcHash(s string) string {
 func funcBase64(text string) string {
 	hash := md5.Sum([]byte(text))
 	return base64.StdEncoding.EncodeToString(hash[:])
+}
+
+func funcNormalizeDateWithAdjustment(date string) string {
+	arr := make([]string, 0)
+	arrAdd := strings.Split(date, ":add:")
+	arrSub := strings.Split(date, ":subtract:")
+
+	if len(arrAdd) > 1 {
+		arr = arrAdd
+	} else if len(arrSub) > 1 {
+		arr = arrSub
+	}
+
+	if len(arr) > 1 {
+		datetime := arr[0]
+		durationcount := strings.Split(arr[1], "*")
+		durationtime := 1
+
+		for _, v := range durationcount {
+			i, _ := strconv.Atoi(v)
+			durationtime = durationtime * i
+		}
+
+		if len(arrAdd) > 1 {
+			date = AddDateInSecond(datetime, durationtime)
+		} else if len(arrSub) > 1 {
+			date = SubtractDateInSecond(datetime, durationtime)
+		}
+	} else {
+		date = FormatNormalDate(date)
+	}
+
+	return date
+}
+
+func AddDateInSecond(datetime string, durationtime int) {
+	panic("unimplemented")
 }
 
 func trimQuotes(s string) string {
