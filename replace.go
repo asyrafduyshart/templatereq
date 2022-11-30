@@ -2,6 +2,7 @@ package templatereq
 
 import (
 	"crypto/md5"
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
@@ -57,6 +58,8 @@ func funcSwitch(f, v string) string {
 		return funcMd5(v)
 	case "base64":
 		return funcBase64(v)
+	case "sha256":
+		return funcSha256(v)
 	case "dateFormat":
 		return funcNormalizeDateWithAdjustment(v)
 	default:
@@ -110,6 +113,10 @@ func funcNormalizeDateWithAdjustment(date string) string {
 	return date
 }
 
+func AddDateInSecond(datetime string, durationtime int) {
+	panic("unimplemented")
+}
+
 func trimQuotes(s string) string {
 	if len(s) >= 2 {
 		if c := s[len(s)-1]; s[0] == c && (c == '"' || c == '\'') {
@@ -144,6 +151,11 @@ func funcUrlEncode(m map[string]string) string {
 
 func funcMd5(text string) string {
 	hash := md5.Sum([]byte(text))
+	return hex.EncodeToString(hash[:])
+}
+
+func funcSha256(text string) string {
+	hash := sha256.Sum256([]byte(text))
 	return hex.EncodeToString(hash[:])
 }
 
