@@ -60,6 +60,8 @@ func funcSwitch(f, v string) string {
 		return funcBase64(v)
 	case "sha256":
 		return funcSha256(v)
+	case "sha256LowerCase":
+		return funcSha256ToLowerCase(v)
 	case "dateFormat":
 		return funcNormalizeDateWithAdjustment(v)
 	default:
@@ -113,10 +115,6 @@ func funcNormalizeDateWithAdjustment(date string) string {
 	return date
 }
 
-func AddDateInSecond(datetime string, durationtime int) {
-	panic("unimplemented")
-}
-
 func trimQuotes(s string) string {
 	if len(s) >= 2 {
 		if c := s[len(s)-1]; s[0] == c && (c == '"' || c == '\'') {
@@ -156,6 +154,11 @@ func funcMd5(text string) string {
 
 func funcSha256(text string) string {
 	hash := sha256.Sum256([]byte(text))
+	return hex.EncodeToString(hash[:])
+}
+
+func funcSha256ToLowerCase(text string) string {
+	hash := sha256.Sum256([]byte(strings.ToLower(text)))
 	return hex.EncodeToString(hash[:])
 }
 

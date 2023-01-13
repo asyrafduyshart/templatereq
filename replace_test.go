@@ -113,6 +113,13 @@ func TestFuncMD5(t *testing.T) {
 func TestFuncSha256(t *testing.T) {
 	r := "NKG2022-11-18 09:01:472022-11-18 09:01:47SecretKey"
 	funcSha256(r)
+}
+
+func TestFuncSha256ToLowerCase(t *testing.T) {
+	r := "NKG2022-11-18 09:01:472022-11-18 09:01:47SecretKey"
+	funcSha256ToLowerCase(r)
+}
+
 func TestFuncMD5Base64(t *testing.T) {
 	r := "apple=2&mango=3&orange=1&strawberry=4"
 	funcBase64(r)
