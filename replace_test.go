@@ -113,6 +113,8 @@ func TestFuncMD5(t *testing.T) {
 func TestFuncSha256(t *testing.T) {
 	r := "NKG2022-11-18 09:01:472022-11-18 09:01:47SecretKey"
 	funcSha256(r)
+}
+
 func TestFuncMD5Base64(t *testing.T) {
 	r := "apple=2&mango=3&orange=1&strawberry=4"
 	funcBase64(r)
@@ -165,6 +167,94 @@ func TestFuncNormalizeDateWithAdjustment(t *testing.T) {
 	// subtract 5 day
 	init = replaceFuncWithValue(`$func("dateFormat:2022-11-07T04:40:39Z:subtract:60*60*24*5")`)
 	expect = "2022-11-02 04:40:39"
+	if init != expect {
+		t.Errorf("got %v, want %v", expect, init)
+	}
+}
+
+func TestFuncToLowerCaseEncryption(t *testing.T) {
+	normal := "40813778-6a91-ed11-9d7a-00224819278b3c784854-2a22-ea11-a601-281878584619644953E9-9830-4C41-9E7D-173FE93A784F"
+	expect := "40813778-6a91-ed11-9d7a-00224819278b3c784854-2a22-ea11-a601-281878584619644953e9-9830-4c41-9e7d-173fe93a784f"
+	init := funcEncrToLowerCase(normal)
+	if init != expect {
+		t.Errorf("got %v, want %v", expect, init)
+	}
+
+	hash := "40813778-6a91-ed11-9d7a-00224819278b3c784854-2a22-ea11-a601-281878584619644953E9-9830-4C41-9E7D-173FE93A784F:encr:hash"
+	expect = "3113325545"
+	init = funcEncrToLowerCase(hash)
+	if init != expect {
+		t.Errorf("got %v, want %v", expect, init)
+	}
+
+	md5 := "40813778-6a91-ed11-9d7a-00224819278b3c784854-2a22-ea11-a601-281878584619644953E9-9830-4C41-9E7D-173FE93A784F:encr:md5"
+	expect = "dcf64ec74c4d892c6d541b2288e82ac4"
+	init = funcEncrToLowerCase(md5)
+	if init != expect {
+		t.Errorf("got %v, want %v", expect, init)
+	}
+
+	base64 := "40813778-6a91-ed11-9d7a-00224819278b3c784854-2a22-ea11-a601-281878584619644953E9-9830-4C41-9E7D-173FE93A784F:encr:base64"
+	expect = "3PZOx0xNiSxtVBsiiOgqxA=="
+	init = funcEncrToLowerCase(base64)
+	if init != expect {
+		t.Errorf("got %v, want %v", expect, init)
+	}
+
+	sha256 := "40813778-6a91-ed11-9d7a-00224819278b3c784854-2a22-ea11-a601-281878584619644953E9-9830-4C41-9E7D-173FE93A784F:encr:sha256"
+	expect = "35355aa4d79c39110dd97563c3d4de0b991847a85432ecab3712bf14177ebb12"
+	init = funcEncrToLowerCase(sha256)
+	if init != expect {
+		t.Errorf("got %v, want %v", expect, init)
+	}
+
+	sha256 = "NKG2022-11-18 09:01:472022-11-18 09:01:47SecretKey:encr:sha256"
+	expect = "2f6057738e3de44cec9af0376d4bf41a3982e0aef7eb0a0b6833cb8744d2c5fc"
+	init = funcEncrToLowerCase(sha256)
+	if init != expect {
+		t.Errorf("got %v, want %v", expect, init)
+	}
+}
+
+func TestFuncToUpperCaseEncryption(t *testing.T) {
+	normal := "40813778-6a91-ed11-9d7a-00224819278b3c784854-2a22-ea11-a601-281878584619644953E9-9830-4C41-9E7D-173FE93A784F"
+	expect := "40813778-6A91-ED11-9D7A-00224819278B3C784854-2A22-EA11-A601-281878584619644953E9-9830-4C41-9E7D-173FE93A784F"
+	init := funcEncrToUpperCase(normal)
+	if init != expect {
+		t.Errorf("got %v, want %v", expect, init)
+	}
+
+	hash := "40813778-6a91-ed11-9d7a-00224819278b3c784854-2a22-ea11-a601-281878584619644953E9-9830-4C41-9E7D-173FE93A784F:encr:hash"
+	expect = "598253769"
+	init = funcEncrToUpperCase(hash)
+	if init != expect {
+		t.Errorf("got %v, want %v", expect, init)
+	}
+
+	md5 := "40813778-6a91-ed11-9d7a-00224819278b3c784854-2a22-ea11-a601-281878584619644953E9-9830-4C41-9E7D-173FE93A784F:encr:md5"
+	expect = "c3439f20866862eb7a4d1e24542ef33b"
+	init = funcEncrToUpperCase(md5)
+	if init != expect {
+		t.Errorf("got %v, want %v", expect, init)
+	}
+
+	base64 := "40813778-6a91-ed11-9d7a-00224819278b3c784854-2a22-ea11-a601-281878584619644953E9-9830-4C41-9E7D-173FE93A784F:encr:base64"
+	expect = "w0OfIIZoYut6TR4kVC7zOw=="
+	init = funcEncrToUpperCase(base64)
+	if init != expect {
+		t.Errorf("got %v, want %v", expect, init)
+	}
+
+	sha256 := "40813778-6a91-ed11-9d7a-00224819278b3c784854-2a22-ea11-a601-281878584619644953E9-9830-4C41-9E7D-173FE93A784F:encr:sha256"
+	expect = "fd2a6d020847dd7973d2e386b2068473c56114f4ae2ecaad385ab6f5d57c1dd0"
+	init = funcEncrToUpperCase(sha256)
+	if init != expect {
+		t.Errorf("got %v, want %v", expect, init)
+	}
+
+	sha256 = "NKG2022-11-18 09:01:472022-11-18 09:01:47SecretKey:encr:sha256"
+	expect = "c0df99660f43a0b56bdda4df6142736f697e5cbb27328893944bdb2c0d4e5dce"
+	init = funcEncrToUpperCase(sha256)
 	if init != expect {
 		t.Errorf("got %v, want %v", expect, init)
 	}

@@ -62,6 +62,10 @@ func funcSwitch(f, v string) string {
 		return funcSha256(v)
 	case "dateFormat":
 		return funcNormalizeDateWithAdjustment(v)
+	case "lowercase":
+		return funcEncrToLowerCase(v)
+	case "uppercase":
+		return funcEncrToUpperCase(v)
 	default:
 		return v
 	}
@@ -113,10 +117,6 @@ func funcNormalizeDateWithAdjustment(date string) string {
 	return date
 }
 
-func AddDateInSecond(datetime string, durationtime int) {
-	panic("unimplemented")
-}
-
 func trimQuotes(s string) string {
 	if len(s) >= 2 {
 		if c := s[len(s)-1]; s[0] == c && (c == '"' || c == '\'') {
@@ -157,6 +157,30 @@ func funcMd5(text string) string {
 func funcSha256(text string) string {
 	hash := sha256.Sum256([]byte(text))
 	return hex.EncodeToString(hash[:])
+}
+
+func funcEncrToLowerCase(text string) string {
+	encrs := strings.Split(text, ":encr:")
+	if len(encrs) > 1 {
+		encrType := encrs[1]
+		oldTxt := strings.ToLower(encrs[0])
+		newTxt := funcSwitch(encrType, oldTxt)
+		return newTxt
+	} else {
+		return strings.ToLower(text)
+	}
+}
+
+func funcEncrToUpperCase(text string) string {
+	encrs := strings.Split(text, ":encr:")
+	if len(encrs) > 1 {
+		encrType := encrs[1]
+		oldTxt := strings.ToUpper(encrs[0])
+		newTxt := funcSwitch(encrType, oldTxt)
+		return newTxt
+	} else {
+		return strings.ToUpper(text)
+	}
 }
 
 //ALL
