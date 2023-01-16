@@ -115,9 +115,48 @@ func TestFuncSha256(t *testing.T) {
 	funcSha256(r)
 }
 
-func TestFuncSha256ToLowerCase(t *testing.T) {
-	r := "NKG2022-11-18 09:01:472022-11-18 09:01:47SecretKey"
-	funcSha256ToLowerCase(r)
+func TestFuncToLowerCaseEncryption(t *testing.T) {
+	normal := "40813778-6a91-ed11-9d7a-00224819278b3c784854-2a22-ea11-a601-281878584619644953E9-9830-4C41-9E7D-173FE93A784F"
+	expect := "40813778-6a91-ed11-9d7a-00224819278b3c784854-2a22-ea11-a601-281878584619644953e9-9830-4c41-9e7d-173fe93a784f"
+	init := funcEncrToLowerCase(normal)
+	if init != expect {
+		t.Errorf("got %v, want %v", expect, init)
+	}
+
+	hash := "40813778-6a91-ed11-9d7a-00224819278b3c784854-2a22-ea11-a601-281878584619644953E9-9830-4C41-9E7D-173FE93A784F:encr:hash"
+	expect = "3113325545"
+	init = funcEncrToLowerCase(hash)
+	if init != expect {
+		t.Errorf("got %v, want %v", expect, init)
+	}
+
+	md5 := "40813778-6a91-ed11-9d7a-00224819278b3c784854-2a22-ea11-a601-281878584619644953E9-9830-4C41-9E7D-173FE93A784F:encr:md5"
+	expect = "dcf64ec74c4d892c6d541b2288e82ac4"
+	init = funcEncrToLowerCase(md5)
+	if init != expect {
+		t.Errorf("got %v, want %v", expect, init)
+	}
+
+	base64 := "40813778-6a91-ed11-9d7a-00224819278b3c784854-2a22-ea11-a601-281878584619644953E9-9830-4C41-9E7D-173FE93A784F:encr:base64"
+	expect = "3PZOx0xNiSxtVBsiiOgqxA=="
+	init = funcEncrToLowerCase(base64)
+	if init != expect {
+		t.Errorf("got %v, want %v", expect, init)
+	}
+
+	sha256 := "40813778-6a91-ed11-9d7a-00224819278b3c784854-2a22-ea11-a601-281878584619644953E9-9830-4C41-9E7D-173FE93A784F:encr:sha256"
+	expect = "35355aa4d79c39110dd97563c3d4de0b991847a85432ecab3712bf14177ebb12"
+	init = funcEncrToLowerCase(sha256)
+	if init != expect {
+		t.Errorf("got %v, want %v", expect, init)
+	}
+
+	sha256 = "NKG2022-11-18 09:01:472022-11-18 09:01:47SecretKey:encr:sha256"
+	expect = "2f6057738e3de44cec9af0376d4bf41a3982e0aef7eb0a0b6833cb8744d2c5fc"
+	init = funcEncrToLowerCase(sha256)
+	if init != expect {
+		t.Errorf("got %v, want %v", expect, init)
+	}
 }
 
 func TestFuncMD5Base64(t *testing.T) {

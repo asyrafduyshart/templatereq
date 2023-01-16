@@ -60,10 +60,12 @@ func funcSwitch(f, v string) string {
 		return funcBase64(v)
 	case "sha256":
 		return funcSha256(v)
-	case "sha256LowerCase":
-		return funcSha256ToLowerCase(v)
 	case "dateFormat":
 		return funcNormalizeDateWithAdjustment(v)
+	case "lowercase":
+		return funcEncrToLowerCase(v)
+	case "uppercase":
+		return funcEncrToUpperCase(v)
 	default:
 		return v
 	}
@@ -157,9 +159,28 @@ func funcSha256(text string) string {
 	return hex.EncodeToString(hash[:])
 }
 
-func funcSha256ToLowerCase(text string) string {
-	hash := sha256.Sum256([]byte(strings.ToLower(text)))
-	return hex.EncodeToString(hash[:])
+func funcEncrToLowerCase(text string) string {
+	encrs := strings.Split(text, ":encr:")
+	if len(encrs) > 1 {
+		encrType := encrs[1]
+		oldTxt := strings.ToLower(encrs[0])
+		newTxt := funcSwitch(encrType, oldTxt)
+		return newTxt
+	} else {
+		return strings.ToLower(text)
+	}
+}
+
+func funcEncrToUpperCase(text string) string {
+	encrs := strings.Split(text, ":encr:")
+	if len(encrs) > 1 {
+		encrType := encrs[1]
+		oldTxt := strings.ToUpper(encrs[0])
+		newTxt := funcSwitch(encrType, oldTxt)
+		return newTxt
+	} else {
+		return strings.ToUpper(text)
+	}
 }
 
 //ALL
