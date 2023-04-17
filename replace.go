@@ -12,6 +12,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/google/uuid"
 )
 
 func replaceByMap(t string, v map[string]string) string {
@@ -66,6 +68,8 @@ func funcSwitch(f, v string) string {
 		return funcEncrToLowerCase(v)
 	case "uppercase":
 		return funcEncrToUpperCase(v)
+	case "uuid":
+		return funcGenUUID()
 	default:
 		return v
 	}
@@ -181,6 +185,10 @@ func funcEncrToUpperCase(text string) string {
 	} else {
 		return strings.ToUpper(text)
 	}
+}
+
+func funcGenUUID() string {
+	return uuid.New().String()
 }
 
 //ALL

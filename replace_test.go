@@ -1,7 +1,11 @@
 package templatereq
 
 import (
+	"fmt"
+	"strings"
 	"testing"
+
+	"github.com/google/uuid"
 )
 
 var template = "https://www.testweb.com/$TEST"
@@ -258,4 +262,16 @@ func TestFuncToUpperCaseEncryption(t *testing.T) {
 	if init != expect {
 		t.Errorf("got %v, want %v", expect, init)
 	}
+}
+
+func TestFuncReplaceToUUID(t *testing.T) {
+	template_uuid := `http://hello.com/$func("uuid:$UUID")`
+	init := replaceFuncWithValue(template_uuid)
+
+	guid := strings.Split(init, "/")[3]
+	_, err := uuid.Parse(guid)
+	if err != nil {
+		t.Errorf("got %v", err)
+	}
+	fmt.Println(init)
 }
