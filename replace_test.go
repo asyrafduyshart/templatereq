@@ -276,12 +276,11 @@ func TestFuncReplaceToUUID(t *testing.T) {
 	fmt.Println(init)
 }
 func TestFuncDecodeBase64ToStr(t *testing.T) {
-	trx_id := "b74bf098-b7ec-4593-80b9-e4194fbc12bf"
-	trx_id_base64 := "Yjc0YmYwOTgtYjdlYy00NTkzLTgwYjktZTQxOTRmYmMxMmJm"
+	str := "b74bf098-b7ec-4593-80b9-e4194fbc12bf"
+	base64 := "Yjc0YmYwOTgtYjdlYy00NTkzLTgwYjktZTQxOTRmYmMxMmJm"
 
-	dcd := funcDecodeBase64ToStr(trx_id_base64)
-
-	if dcd != trx_id {
+	base64ToStr := funcDecodeBase64ToStr(base64)
+	if base64ToStr != str {
 		t.Errorf("result from decode base64 not matched!")
 	}
 }
