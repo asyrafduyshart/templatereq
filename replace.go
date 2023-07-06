@@ -70,6 +70,8 @@ func funcSwitch(f, v string) string {
 		return funcEncrToUpperCase(v)
 	case "uuid":
 		return funcGenUUID()
+	case "base64ToStr":
+		return funcDecodeBase64ToStr(v)
 	default:
 		return v
 	}
@@ -189,6 +191,14 @@ func funcEncrToUpperCase(text string) string {
 
 func funcGenUUID() string {
 	return uuid.New().String()
+}
+
+func funcDecodeBase64ToStr(str string) string {
+	dcd, err := base64.StdEncoding.DecodeString(str)
+	if err != nil {
+		return ""
+	}
+	return string(dcd[:])
 }
 
 //ALL
