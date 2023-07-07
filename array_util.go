@@ -4,7 +4,7 @@ import "sort"
 
 // a function that will remove duplicate string array
 // example I : a, b, b, c, d, e, f, f, g -> a, b, c, d, e, f, g
-// example II : b, c, f, d, d, a, b, e -> b, c, f, d, e
+// example II : b, c, f, d, d, a, b, e -> b, c, f, d, a, e
 
 type StringsWithPos struct {
 	// slice of strings
