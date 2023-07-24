@@ -126,7 +126,7 @@ func funcNormalizeDateWithAdjustment(date string) string {
 			date = SubtractDateInSecond(datetime, durationtime, TimeFormat(format))
 		}
 	} else {
-		date = FormatNormalDate(date)
+		date = FormatNormalDate(arrFrm[0], format)
 	}
 
 	return date

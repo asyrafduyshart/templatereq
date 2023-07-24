@@ -133,6 +133,30 @@ func TestFuncNormalizeDateWithAdjustment(t *testing.T) {
 		t.Errorf("got %v, want %v", expect, init)
 	}
 
+	// normal with tz
+	init = replaceFuncWithValue(`$func("dateFormat:2022-11-07T04:40:39Z:format:YYYY-MM-DDThh:mm:ssZ")`)
+	expect = "2022-11-07T04:40:39Z"
+
+	if init != expect {
+		t.Errorf("got %v, want %v", expect, init)
+	}
+
+	// nano
+	init = replaceFuncWithValue(`$func("dateFormat:2022-11-07T04:40:39.99999324Z:format:YYYY-MM-DD hh:mm:ss.nnnn")`)
+	expect = "2022-11-07 04:40:39.9999"
+
+	if init != expect {
+		t.Errorf("got %v, want %v", expect, init)
+	}
+
+	// nano with tz
+	init = replaceFuncWithValue(`$func("dateFormat:2022-11-07T04:40:39.99999324Z:format:YYYY-MM-DDThh:mm:ss.nnnnZ")`)
+	expect = "2022-11-07T04:40:39.9999Z"
+
+	if init != expect {
+		t.Errorf("got %v, want %v", expect, init)
+	}
+
 	// add 5 min
 	init = replaceFuncWithValue(`$func("dateFormat:2022-11-07T04:40:39Z:add:60*5")`)
 	expect = "2022-11-07 04:45:39"

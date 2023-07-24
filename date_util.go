@@ -92,9 +92,9 @@ func parseStringToDateTime(t string) time.Time {
 	return date
 }
 
-func FormatNormalDate(t string) string {
+func FormatNormalDate(t string, ft string) string {
 	date := parseStringToDateTime(t)
-	normalDate := date.Format(defaultDt)
+	normalDate := date.Format(TimeFormat(ft).String())
 	return normalDate
 }
 
