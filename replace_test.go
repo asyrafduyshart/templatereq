@@ -24,7 +24,7 @@ func TestReplaceMap(t *testing.T) {
 }
 
 func TestFuncName(t *testing.T) {
-	init := funcName(`func("hash:test")`)
+	init := funcName(`$func("hash:test")`)
 	expect := "hash"
 	if init != expect {
 		t.Errorf("got %v, want %v", expect, init)
@@ -133,6 +133,30 @@ func TestFuncNormalizeDateWithAdjustment(t *testing.T) {
 		t.Errorf("got %v, want %v", expect, init)
 	}
 
+	// normal with tz
+	init = replaceFuncWithValue(`$func("dateFormat:2022-11-07T04:40:39Z:format:YYYY-MM-DDThh:mm:ssZ")`)
+	expect = "2022-11-07T04:40:39Z"
+
+	if init != expect {
+		t.Errorf("got %v, want %v", expect, init)
+	}
+
+	// nano
+	init = replaceFuncWithValue(`$func("dateFormat:2022-11-07T04:40:39.99999324Z:format:YYYY-MM-DD hh:mm:ss.nnnn")`)
+	expect = "2022-11-07 04:40:39.9999"
+
+	if init != expect {
+		t.Errorf("got %v, want %v", expect, init)
+	}
+
+	// nano with tz
+	init = replaceFuncWithValue(`$func("dateFormat:2022-11-07T04:40:39.99999324Z:format:YYYY-MM-DDThh:mm:ss.nnnnZ")`)
+	expect = "2022-11-07T04:40:39.9999Z"
+
+	if init != expect {
+		t.Errorf("got %v, want %v", expect, init)
+	}
+
 	// add 5 min
 	init = replaceFuncWithValue(`$func("dateFormat:2022-11-07T04:40:39Z:add:60*5")`)
 	expect = "2022-11-07 04:45:39"
@@ -171,6 +195,43 @@ func TestFuncNormalizeDateWithAdjustment(t *testing.T) {
 	// subtract 5 day
 	init = replaceFuncWithValue(`$func("dateFormat:2022-11-07T04:40:39Z:subtract:60*60*24*5")`)
 	expect = "2022-11-02 04:40:39"
+	if init != expect {
+		t.Errorf("got %v, want %v", expect, init)
+	}
+}
+
+func TestFuncNormalizeDateWithAdjustmentAndFormat(t *testing.T) {
+	// add 5 min
+	init := replaceFuncWithValue(`$func("dateFormat:2022-11-07T04:40:39Z:add:60*5")`)
+	expect := "2022-11-07 04:45:39"
+	if init != expect {
+		t.Errorf("got %v, want %v", expect, init)
+	}
+
+	// add 5 hour with tz
+	init = replaceFuncWithValue(`$func("dateFormat:2022-11-06T23:40:39Z:add:60*60*5:format:YYYY-MM-DDThh:mm:ssZ")`)
+	expect = "2022-11-07T04:40:39Z"
+	if init != expect {
+		t.Errorf("got %v, want %v", expect, init)
+	}
+
+	// subtract 5 hour with tz
+	init = replaceFuncWithValue(`$func("dateFormat:2022-11-07T04:40:39Z:subtract:60*60*5:format:YYYY-MM-DDThh:mm:ssZ")`)
+	expect = "2022-11-06T23:40:39Z"
+	if init != expect {
+		t.Errorf("got %v, want %v", expect, init)
+	}
+
+	// test nano format
+	init = replaceFuncWithValue(`$func("dateFormat:2022-11-07T04:40:39.99999Z:subtract:60*60*5:format:YYYY-MM-DD hh:mm:ss.nnnn")`)
+	expect = "2022-11-06 23:40:39.9999"
+	if init != expect {
+		t.Errorf("got %v, want %v", expect, init)
+	}
+
+	// test nano format with tz
+	init = replaceFuncWithValue(`$func("dateFormat:2022-11-07T04:40:39.99999Z:subtract:60*60*5:format:YYYY-MM-DDThh:mm:ss.nnnnZ")`)
+	expect = "2022-11-06T23:40:39.9999Z"
 	if init != expect {
 		t.Errorf("got %v, want %v", expect, init)
 	}

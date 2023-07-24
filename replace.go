@@ -92,13 +92,22 @@ func funcBase64(text string) string {
 
 func funcNormalizeDateWithAdjustment(date string) string {
 	arr := make([]string, 0)
-	arrAdd := strings.Split(date, ":add:")
-	arrSub := strings.Split(date, ":subtract:")
+	format := ""
+
+	arrFrm := strings.Split(date, ":format:")
+	arrAdd := strings.Split(arrFrm[0], ":add:")
+	arrSub := strings.Split(arrFrm[0], ":subtract:")
 
 	if len(arrAdd) > 1 {
 		arr = arrAdd
 	} else if len(arrSub) > 1 {
 		arr = arrSub
+	}
+
+	if len(arrFrm) > 1 {
+		format = arrFrm[1]
+	} else {
+		format = Dt.String()
 	}
 
 	if len(arr) > 1 {
@@ -112,12 +121,12 @@ func funcNormalizeDateWithAdjustment(date string) string {
 		}
 
 		if len(arrAdd) > 1 {
-			date = AddDateInSecond(datetime, durationtime)
+			date = AddDateInSecond(datetime, durationtime, TimeFormat(format))
 		} else if len(arrSub) > 1 {
-			date = SubtractDateInSecond(datetime, durationtime)
+			date = SubtractDateInSecond(datetime, durationtime, TimeFormat(format))
 		}
 	} else {
-		date = FormatNormalDate(date)
+		date = FormatNormalDate(arrFrm[0], format)
 	}
 
 	return date
