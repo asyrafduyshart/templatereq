@@ -85,7 +85,7 @@ func (t TimeFormat) String() string {
 }
 
 func parseStringToDateTime(t string) time.Time {
-	date, err := time.Parse(time.RFC3339, t)
+	date, err := time.Parse(time.RFC3339Nano, t)
 	if err != nil {
 		fmt.Println(err)
 	}
