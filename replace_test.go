@@ -345,3 +345,23 @@ func TestFuncDecodeBase64ToStr(t *testing.T) {
 		t.Errorf("result from decode base64 not matched!")
 	}
 }
+
+func TestChainingFunction(t *testing.T) {
+
+	chain := "chain:arrayPos::secondTick::http://dev1,http://dev2,http://dev3,http://dev4"
+	encrypt := "@dateOffset:::subtract:60*60*4:format:YYMMDD>>append::AAAAA>>encrypt::md5>>prepend::ID_1=123456&ID_2=123456>>encrypt::md5"
+	prepend := ">>prepend::/api/public?Name=abcdefg&ID=abc&Key=abcdef"
+	append := ">>append::abcdef&Lang=id-ID"
+	join := `$func("` + chain + encrypt + append + prepend + `")`
+
+	offset := replaceFuncWithValue(`$func("dateOffset:::subtract:60*60*4:format:YYMMDD")`)
+	result := replaceFuncWithValue(join)
+
+	fmt.Println("offset: ", offset)
+	fmt.Println("result: ", result)
+}
+
+func TestGetArrayPositionBySeconds(t *testing.T) {
+	server := replaceFuncWithValue(`$func("arrayPos:secondTick::http://dev1,http://dev2,http://dev3,http://dev4")`)
+	fmt.Println("SERVER_RESULT: ", server)
+}
