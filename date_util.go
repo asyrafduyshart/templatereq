@@ -2,6 +2,8 @@ package templatereq
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -15,10 +17,16 @@ type TimeFormat string
 const defaultDt string = "2006-01-02 15:04:05"
 
 const (
+	Add      string = "add"
+	Subtract string = "subtract"
+)
+
+const (
 	Dt          TimeFormat = "YYYY-MM-DD hh:mm:ss"
 	Dtz         TimeFormat = "YYYY-MM-DDThh:mm:ssZ"
 	Dtm         TimeFormat = "YYYY-MM-DD hh:mm:ss.nnnn"
 	Dtmz        TimeFormat = "YYYY-MM-DDThh:mm:ss.nnnnZ"
+	YYMMDD      TimeFormat = "YYMMDD"
 	Layout      TimeFormat = "01/02 03:04:05PM '06 -0700" // The reference time, in numerical order.
 	ANSIC       TimeFormat = "Mon Jan _2 15:04:05 2006"
 	UnixDate    TimeFormat = "Mon Jan _2 15:04:05 MST 2006"
@@ -84,6 +92,15 @@ func (t TimeFormat) String() string {
 	}
 }
 
+func (t TimeFormat) CustomFormat(v time.Time) string {
+	switch t {
+	case YYMMDD:
+		return formatYYMMDD(v)
+	default:
+		return v.Format(defaultDt)
+	}
+}
+
 func parseStringToDateTime(t string) time.Time {
 	date, err := time.Parse(time.RFC3339Nano, t)
 	if err != nil {
@@ -110,4 +127,69 @@ func SubtractDateInSecond(t string, n int, ft TimeFormat) string {
 	d1 := date.Add(-time.Duration(time.Second * time.Duration(n)))
 	d2 := d1.Format(ft.String())
 	return d2
+}
+
+func GetNow() time.Time {
+	return time.Now()
+}
+
+func GetDateTimeOffset(v string) string {
+
+	var arr []string
+	format := ""
+	method := ""
+	durationtime := 1
+
+	date := time.Now()
+	_, offset := date.Zone() // get timezone environment's offset in seconds
+
+	arrFrm := strings.Split(v, ":format:")
+	arrAdd := strings.Split(arrFrm[0], ":add:")
+	arrSub := strings.Split(arrFrm[0], ":subtract:")
+
+	if len(arrAdd) > 1 {
+		arr = arrAdd
+		method = Subtract
+		format = arrFrm[1]
+	} else if len(arrSub) > 1 {
+		arr = arrSub
+		method = Subtract
+		format = arrFrm[1]
+	} else {
+		return date.Format(Dtz.String())
+	}
+
+	durationcount := strings.Split(arr[1], "*")
+
+	for _, v := range durationcount {
+		i, _ := strconv.Atoi(v)
+		durationtime = durationtime * i
+	}
+
+	durationtime += offset
+
+	switch method {
+	case Add:
+		subtract := date.Add(time.Duration(time.Second * time.Duration(durationtime)))
+		return TimeFormat(format).CustomFormat(subtract)
+	case Subtract:
+		subtract := date.Add(-time.Duration(time.Second * time.Duration(durationtime)))
+		return TimeFormat(format).CustomFormat(subtract)
+	default:
+		return date.Format(Dtz.String())
+	}
+}
+
+func formatYYMMDD(v time.Time) string {
+	year := strconv.Itoa(v.Year())
+	day := strconv.Itoa(v.Day())
+	month := ""
+
+	if int(v.Month()) < 10 {
+		month = "0" + strconv.Itoa(int(v.Month()))
+	} else {
+		month = strconv.Itoa(int(v.Month()))
+	}
+
+	return year[len(year)-2:] + month + day
 }

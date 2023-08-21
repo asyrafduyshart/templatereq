@@ -1,6 +1,7 @@
 package templatereq
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -24,4 +25,9 @@ func TestAdjustDate(t *testing.T) {
 	if init != expect {
 		t.Errorf("got %v, want %v", expect, init)
 	}
+}
+
+func TestDateTimeOffset(t *testing.T) {
+	date := replaceFuncWithValue(`$func("dateOffset:::subtract:60*60*4:format:Dtmz")`)
+	fmt.Println(date)
 }

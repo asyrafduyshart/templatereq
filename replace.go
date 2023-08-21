@@ -7,6 +7,8 @@ import (
 	"encoding/hex"
 	"fmt"
 	"hash/fnv"
+	"math"
+	"math/rand"
 	"net/url"
 	"regexp"
 	"sort"
@@ -14,6 +16,39 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+)
+
+// function map
+var functionMap = map[string]string{
+	"hash":        "hash",
+	"base64":      "base64",
+	"sha256":      "sha256",
+	"dateOffset":  "dateOffset",
+	"dateFormat":  "dateFormat",
+	"lowercase":   "lowercase",
+	"uppercase":   "uppercase",
+	"uuid":        "uuid",
+	"base64ToStr": "base64ToStr",
+	"arrayPos":    "arrayPos",
+	"chain":       "chain",
+}
+
+// method map
+var methodMap = map[string]string{
+	"encrypt": "encrypt",
+}
+
+// command enum
+const (
+	Prepend string = "prepend"
+	Append  string = "append"
+)
+
+// distribute enum
+const (
+	RoundRobin string = "roundRobin"
+	SecondTick string = "secondTick"
+	Random     string = "random"
 )
 
 func replaceByMap(t string, v map[string]string) string {
@@ -62,6 +97,8 @@ func funcSwitch(f, v string) string {
 		return funcBase64(v)
 	case "sha256":
 		return funcSha256(v)
+	case "dateOffset":
+		return funcGetDateTimeWithOffset(v)
 	case "dateFormat":
 		return funcNormalizeDateWithAdjustment(v)
 	case "lowercase":
@@ -72,6 +109,10 @@ func funcSwitch(f, v string) string {
 		return funcGenUUID()
 	case "base64ToStr":
 		return funcDecodeBase64ToStr(v)
+	case "chain":
+		return funcChaining(v)
+	case "arrayPos":
+		return funcGetArrayPosition(v)
 	default:
 		return v
 	}
@@ -88,6 +129,10 @@ func funcHash(s string) string {
 func funcBase64(text string) string {
 	hash := md5.Sum([]byte(text))
 	return base64.StdEncoding.EncodeToString(hash[:])
+}
+
+func funcGetDateTimeWithOffset(v string) string {
+	return GetDateTimeOffset(v)
 }
 
 func funcNormalizeDateWithAdjustment(date string) string {
@@ -208,6 +253,89 @@ func funcDecodeBase64ToStr(str string) string {
 		return ""
 	}
 	return string(dcd[:])
+}
+
+func funcChaining(v string) string {
+
+	chains := strings.Split(v, "@")
+	var prev = ""
+	var next = ""
+
+	for i := 0; i < len(chains); i++ {
+		arr := strings.Split(chains[i], ">>")
+		next = prev + chain(arr)
+		prev = next
+	}
+
+	return next
+}
+
+func chain(arrChain []string) string {
+	val := ""
+	for i := 0; i < len(arrChain); i++ {
+		arr := strings.SplitN(arrChain[i], "::", 2)
+		_, isFunc := functionMap[arr[0]]
+		_, isEncrypt := methodMap[arr[0]]
+
+		// array must >= 2
+		if len(arr) < 2 {
+			val = "[400] ERROR FUNCTION:[" + arr[0] + "] array length minimum is 2"
+			break
+		}
+
+		// if encryption method
+		if isEncrypt {
+			val = funcSwitch(arr[1], val)
+		}
+
+		// if not encryption method
+		if !isEncrypt {
+			append := arr[0] == Append
+			prepend := arr[0] == Prepend
+			if append {
+				val += arr[1]
+			} else if prepend {
+				val = arr[1] + val
+			} else if isFunc {
+				val += funcSwitch(arr[0], arr[1])
+			}
+		}
+	}
+
+	return val
+
+}
+
+func funcGetArrayPosition(svr string) string {
+
+	arr := strings.Split(svr, "::")
+	method := arr[0]
+	servers := strings.Split(arr[1], ",")
+
+	var serverLen int = len(servers)
+	var serverId string = servers[0]
+
+	switch method {
+	case RoundRobin:
+		break
+	case SecondTick:
+		var partition = int(math.Round(float64(60 / serverLen)))
+		var currSecond = GetNow().Second()
+		for i := 0; i < serverLen; i++ {
+			var a = i * partition
+			var b = ((i + 1) * partition)
+			if currSecond > a && currSecond <= b {
+				serverId = servers[i]
+				break
+			}
+		}
+	case Random:
+		serverId = servers[rand.Intn(serverLen)]
+	default:
+		break
+	}
+
+	return serverId
 }
 
 //ALL
