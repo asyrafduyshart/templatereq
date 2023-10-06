@@ -193,3 +193,7 @@ func formatYYMMDD(v time.Time) string {
 
 	return year[len(year)-2:] + month + day
 }
+
+func GetDateNowUnix() string {
+	return strconv.Itoa(int(time.Now().Unix()))
+}
