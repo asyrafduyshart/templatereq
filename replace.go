@@ -51,6 +51,11 @@ const (
 	Random     string = "random"
 )
 
+// date type
+const (
+	Unix string = "Unix"
+)
+
 func replaceByMap(t string, v map[string]string) string {
 	re := regexp.MustCompile(`\$[A-Z_]+`)
 
@@ -113,6 +118,8 @@ func funcSwitch(f, v string) string {
 		return funcChaining(v)
 	case "arrayPos":
 		return funcGetArrayPosition(v)
+	case "dateNow":
+		return funcDateNow(v)
 	default:
 		return v
 	}
@@ -336,6 +343,15 @@ func funcGetArrayPosition(svr string) string {
 	}
 
 	return serverId
+}
+
+func funcDateNow(v string) string {
+	switch v {
+	case Unix:
+		return GetDateNowUnix()
+	default:
+		return v
+	}
 }
 
 //ALL

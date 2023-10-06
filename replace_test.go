@@ -365,3 +365,8 @@ func TestGetArrayPositionBySeconds(t *testing.T) {
 	server := replaceFuncWithValue(`$func("arrayPos:secondTick::http://dev1,http://dev2,http://dev3,http://dev4")`)
 	fmt.Println("SERVER_RESULT: ", server)
 }
+
+func TestGetDateNow(t *testing.T) {
+	server := replaceFuncWithValue(`$func("dateNow:Unix")`)
+	fmt.Println("SERVER_RESULT: ", server)
+}
