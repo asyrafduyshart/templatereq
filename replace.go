@@ -31,6 +31,7 @@ var functionMap = map[string]string{
 	"base64ToStr": "base64ToStr",
 	"arrayPos":    "arrayPos",
 	"chain":       "chain",
+	"dateNow":     "dateNow",
 }
 
 // method map
