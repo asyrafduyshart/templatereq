@@ -207,6 +207,10 @@ func TestFuncNormalizeDateWithAdjustment(t *testing.T) {
 	}
 }
 
+func TestFuncDateTimeFormat(t *testing.T) {
+	replaceFuncWithValue(`$func("chain:dateNow::Standard>>append:::format:>>encrypt::dateTimeFormat")`)
+}
+
 func TestFuncNormalizeDateWithAdjustmentAndFormat(t *testing.T) {
 	// add 5 min
 	init := replaceFuncWithValue(`$func("dateFormat:2022-11-07T04:40:39Z:add:60*5")`)

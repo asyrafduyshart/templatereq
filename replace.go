@@ -17,6 +17,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -58,7 +59,8 @@ const (
 
 // date type
 const (
-	Unix string = "Unix"
+	Unix     string = "Unix"
+	Standard string = "Standard"
 )
 
 func replaceByMap(t string, v map[string]string) string {
@@ -113,6 +115,8 @@ func funcSwitch(f, v string) string {
 		return funcGetDateTimeWithOffset(v)
 	case "dateFormat":
 		return funcNormalizeDateWithAdjustment(v)
+	case "dateTimeFormat":
+		return funcDateTimeFormat(v)
 	case "lowercase":
 		return funcEncrToLowerCase(v)
 	case "uppercase":
@@ -216,6 +220,27 @@ func funcNormalizeDateWithAdjustment(date string) string {
 	}
 
 	return date
+}
+
+func funcDateTimeFormat(date string) string {
+	f := ""
+	r := ""
+	arrFrm := strings.Split(date, ":format:")
+
+	if len(arrFrm) > 1 && arrFrm[1] != "" {
+		f = arrFrm[1]
+	} else {
+		f = time.RFC3339
+	}
+
+	dt := parseStringToDateTime(arrFrm[0])
+	if DateTimeFormat[f] != "" {
+		r = dt.Format(DateTimeFormat[f])
+	} else {
+		r = dt.Format(f)
+	}
+
+	return r
 }
 
 func trimQuotes(s string) string {
@@ -380,6 +405,8 @@ func funcDateNow(v string) string {
 	switch v {
 	case Unix:
 		return GetDateNowUnix()
+	case Standard:
+		return time.Now().Format(time.RFC3339)
 	default:
 		return v
 	}
