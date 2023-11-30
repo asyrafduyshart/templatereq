@@ -8,9 +8,11 @@ import (
 	"github.com/google/uuid"
 )
 
-var template = "https://www.testweb.com/$TEST"
-var template_func = `http://hello.com/$func("hash:$TEST")`
-var template_json = `'{"name":"John", "age":$func("hash:$TEST"), "car":null}'`
+var (
+	template      = "https://www.testweb.com/$TEST"
+	template_func = `http://hello.com/$func("hash:$TEST")`
+	template_json = `'{"name":"John", "age":$func("hash:$TEST"), "car":null}'`
+)
 
 func TestReplaceMap(t *testing.T) {
 	init := replaceByMap(template, map[string]string{
@@ -119,6 +121,11 @@ func TestFuncSha256(t *testing.T) {
 	funcSha256(r)
 }
 
+func TestFuncDESCBC(t *testing.T) {
+	r := "stringToEncrypt:keystring:ivstring"
+	funcDESCBC(r)
+}
+
 func TestFuncMD5Base64(t *testing.T) {
 	r := "apple=2&mango=3&orange=1&strawberry=4"
 	funcBase64(r)
@@ -198,6 +205,10 @@ func TestFuncNormalizeDateWithAdjustment(t *testing.T) {
 	if init != expect {
 		t.Errorf("got %v, want %v", expect, init)
 	}
+}
+
+func TestFuncDateTimeFormat(t *testing.T) {
+	replaceFuncWithValue(`$func("chain:dateNow::Standard>>append:::format:>>encrypt::dateTimeFormat")`)
 }
 
 func TestFuncNormalizeDateWithAdjustmentAndFormat(t *testing.T) {
@@ -336,6 +347,7 @@ func TestFuncReplaceToUUID(t *testing.T) {
 	}
 	fmt.Println(init)
 }
+
 func TestFuncDecodeBase64ToStr(t *testing.T) {
 	str := "b74bf098-b7ec-4593-80b9-e4194fbc12bf"
 	base64 := "Yjc0YmYwOTgtYjdlYy00NTkzLTgwYjktZTQxOTRmYmMxMmJm"
@@ -347,7 +359,6 @@ func TestFuncDecodeBase64ToStr(t *testing.T) {
 }
 
 func TestChainingFunction(t *testing.T) {
-
 	chain := "chain:arrayPos::secondTick::http://dev1,http://dev2,http://dev3,http://dev4"
 	encrypt := "@dateOffset:::subtract:60*60*4:format:YYMMDD>>append::AAAAA>>encrypt::md5>>prepend::ID_1=123456&ID_2=123456>>encrypt::md5"
 	prepend := ">>prepend::/api/public?Name=abcdefg&ID=abc&Key=abcdef"

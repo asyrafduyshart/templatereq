@@ -1,6 +1,9 @@
 package templatereq
 
 import (
+	"bytes"
+	"crypto/cipher"
+	"crypto/des"
 	"crypto/md5"
 	"crypto/sha256"
 	"encoding/base64"
@@ -14,6 +17,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -23,6 +27,7 @@ var functionMap = map[string]string{
 	"hash":        "hash",
 	"base64":      "base64",
 	"sha256":      "sha256",
+	"des-cbc":     "des-cbc",
 	"dateOffset":  "dateOffset",
 	"dateFormat":  "dateFormat",
 	"lowercase":   "lowercase",
@@ -54,7 +59,8 @@ const (
 
 // date type
 const (
-	Unix string = "Unix"
+	Unix     string = "Unix"
+	Standard string = "Standard"
 )
 
 func replaceByMap(t string, v map[string]string) string {
@@ -103,10 +109,14 @@ func funcSwitch(f, v string) string {
 		return funcBase64(v)
 	case "sha256":
 		return funcSha256(v)
+	case "des-cbc":
+		return funcDESCBC(v)
 	case "dateOffset":
 		return funcGetDateTimeWithOffset(v)
 	case "dateFormat":
 		return funcNormalizeDateWithAdjustment(v)
+	case "dateTimeFormat":
+		return funcDateTimeFormat(v)
 	case "lowercase":
 		return funcEncrToLowerCase(v)
 	case "uppercase":
@@ -137,6 +147,33 @@ func funcHash(s string) string {
 func funcBase64(text string) string {
 	hash := md5.Sum([]byte(text))
 	return base64.StdEncoding.EncodeToString(hash[:])
+}
+
+func funcDESCBC(text string) string {
+	arr := strings.Split(text, ":")
+	plainText := []byte(arr[0])
+	encryptkey := []byte(arr[1])
+	encryptIV := []byte(arr[2])
+
+	block, err := des.NewCipher(encryptkey)
+	if err != nil {
+		return ""
+	}
+
+	blockSize := block.BlockSize()
+	origData := PKCS5Padding(plainText, blockSize)
+	blockMode := cipher.NewCBCEncrypter(block, encryptIV)
+	crypted := make([]byte, len(origData))
+	blockMode.CryptBlocks(crypted, origData)
+	q := base64.StdEncoding.EncodeToString(crypted)
+
+	return q
+}
+
+func PKCS5Padding(src []byte, blockSize int) []byte {
+	padding := blockSize - len(src)%blockSize
+	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
+	return append(src, padtext...)
 }
 
 func funcGetDateTimeWithOffset(v string) string {
@@ -183,6 +220,27 @@ func funcNormalizeDateWithAdjustment(date string) string {
 	}
 
 	return date
+}
+
+func funcDateTimeFormat(date string) string {
+	f := ""
+	r := ""
+	arrFrm := strings.Split(date, ":format:")
+
+	if len(arrFrm) > 1 && arrFrm[1] != "" {
+		f = arrFrm[1]
+	} else {
+		f = time.RFC3339
+	}
+
+	dt := parseStringToDateTime(arrFrm[0])
+	if DateTimeFormat[f] != "" {
+		r = dt.Format(DateTimeFormat[f])
+	} else {
+		r = dt.Format(f)
+	}
+
+	return r
 }
 
 func trimQuotes(s string) string {
@@ -264,10 +322,9 @@ func funcDecodeBase64ToStr(str string) string {
 }
 
 func funcChaining(v string) string {
-
 	chains := strings.Split(v, "@")
-	var prev = ""
-	var next = ""
+	prev := ""
+	next := ""
 
 	for i := 0; i < len(chains); i++ {
 		arr := strings.Split(chains[i], ">>")
@@ -311,11 +368,9 @@ func chain(arrChain []string) string {
 	}
 
 	return val
-
 }
 
 func funcGetArrayPosition(svr string) string {
-
 	arr := strings.Split(svr, "::")
 	method := arr[0]
 	servers := strings.Split(arr[1], ",")
@@ -327,11 +382,11 @@ func funcGetArrayPosition(svr string) string {
 	case RoundRobin:
 		break
 	case SecondTick:
-		var partition = int(math.Round(float64(60 / serverLen)))
-		var currSecond = GetNow().Second()
+		partition := int(math.Round(float64(60 / serverLen)))
+		currSecond := GetNow().Second()
 		for i := 0; i < serverLen; i++ {
-			var a = i * partition
-			var b = ((i + 1) * partition)
+			a := i * partition
+			b := ((i + 1) * partition)
 			if currSecond > a && currSecond <= b {
 				serverId = servers[i]
 				break
@@ -350,13 +405,14 @@ func funcDateNow(v string) string {
 	switch v {
 	case Unix:
 		return GetDateNowUnix()
+	case Standard:
+		return time.Now().Format(time.RFC3339)
 	default:
 		return v
 	}
 }
 
-//ALL
-
+// ALL
 func Replace(t string, v map[string]string) string {
 	return replaceByMap(replaceFuncWithValue(replaceByMap(t, v)), v)
 }
