@@ -2,6 +2,7 @@ package templatereq
 
 import (
 	"bytes"
+	"crypto/aes"
 	"crypto/cipher"
 	"crypto/des"
 	"crypto/md5"
@@ -19,24 +20,29 @@ import (
 	"strings"
 	"time"
 
+	"github.com/andreburgaud/crypt2go/ecb"
+	"github.com/andreburgaud/crypt2go/padding"
 	"github.com/google/uuid"
 )
 
 // function map
 var functionMap = map[string]string{
-	"hash":        "hash",
-	"base64":      "base64",
-	"sha256":      "sha256",
-	"des-cbc":     "des-cbc",
-	"dateOffset":  "dateOffset",
-	"dateFormat":  "dateFormat",
-	"lowercase":   "lowercase",
-	"uppercase":   "uppercase",
-	"uuid":        "uuid",
-	"base64ToStr": "base64ToStr",
-	"arrayPos":    "arrayPos",
-	"chain":       "chain",
-	"dateNow":     "dateNow",
+	"hash":               "hash",
+	"base64":             "base64",
+	"sha256":             "sha256",
+	"aes-ecb":            "aes-ecb",
+	"des-cbc":            "des-cbc",
+	"dateOffset":         "dateOffset",
+	"dateTimeFormat":     "dateTimeFormat",
+	"dateTimeZoneFormat": "dateTimeZoneFormat",
+	"dateFormat":         "dateFormat",
+	"lowercase":          "lowercase",
+	"uppercase":          "uppercase",
+	"uuid":               "uuid",
+	"base64ToStr":        "base64ToStr",
+	"arrayPos":           "arrayPos",
+	"chain":              "chain",
+	"dateNow":            "dateNow",
 }
 
 // method map
@@ -109,6 +115,8 @@ func funcSwitch(f, v string) string {
 		return funcBase64(v)
 	case "sha256":
 		return funcSha256(v)
+	case "aes-ecb":
+		return funcAESECB(v)
 	case "des-cbc":
 		return funcDESCBC(v)
 	case "dateOffset":
@@ -117,6 +125,8 @@ func funcSwitch(f, v string) string {
 		return funcNormalizeDateWithAdjustment(v)
 	case "dateTimeFormat":
 		return funcDateTimeFormat(v)
+	case "dateTimeZoneFormat":
+		return funcDateTimeZoneFormat(v)
 	case "lowercase":
 		return funcEncrToLowerCase(v)
 	case "uppercase":
@@ -149,22 +159,54 @@ func funcBase64(text string) string {
 	return base64.StdEncoding.EncodeToString(hash[:])
 }
 
-func funcDESCBC(text string) string {
-	arr := strings.Split(text, ":")
-	plainText := []byte(arr[0])
-	encryptkey := []byte(arr[1])
-	encryptIV := []byte(arr[2])
+func funcAESECB(text string) string {
+	arr := strings.Split(text, ":param:")
+	pt := []byte(arr[0])  // plaintext to be encrypted
+	key := []byte(arr[1]) // encryption key
 
-	block, err := des.NewCipher(encryptkey)
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return ""
+	}
+	blockMode := ecb.NewECBEncrypter(block)
+
+	// blockMode.BlockSize() for AES-128 would be 16.
+	// Need padding if len(pt) % 16 != 0.
+	padder := padding.NewPkcs7Padding(blockMode.BlockSize())
+	plainText, err := padder.Pad(pt)
 	if err != nil {
 		return ""
 	}
 
-	blockSize := block.BlockSize()
-	origData := PKCS5Padding(plainText, blockSize)
-	blockMode := cipher.NewCBCEncrypter(block, encryptIV)
-	crypted := make([]byte, len(origData))
-	blockMode.CryptBlocks(crypted, origData)
+	crypted := make([]byte, len(plainText))
+	blockMode.CryptBlocks(crypted, plainText)
+	q := base64.StdEncoding.EncodeToString(crypted)
+
+	return q
+}
+
+func funcDESCBC(text string) string {
+	arr := strings.Split(text, ":param:")
+	pt := []byte(arr[0])  // plaintext to be encrypted
+	key := []byte(arr[1]) // encryption key
+	iv := []byte(arr[2])  // encription iv
+
+	block, err := des.NewCipher(key)
+	if err != nil {
+		return ""
+	}
+	blockMode := cipher.NewCBCEncrypter(block, iv)
+
+	// blockMode.BlockSize() for DES would be 8.
+	// Need padding if len(pt) % 8 != 0.
+	padder := padding.NewPkcs5Padding()
+	plainText, err := padder.Pad(pt)
+	if err != nil {
+		return ""
+	}
+
+	crypted := make([]byte, len(plainText))
+	blockMode.CryptBlocks(crypted, plainText)
 	q := base64.StdEncoding.EncodeToString(crypted)
 
 	return q
@@ -239,6 +281,27 @@ func funcDateTimeFormat(date string) string {
 	} else {
 		r = dt.Format(f)
 	}
+
+	return r
+}
+
+func funcDateTimeZoneFormat(date string) string {
+	f := "Asia/Jakarta"
+	r := ""
+	arrFrm := strings.Split(date, ":format:")
+	if len(arrFrm) > 1 && arrFrm[1] != "" {
+		f = arrFrm[1]
+	}
+
+	dt := parseStringToDateTime(arrFrm[0])
+
+	loc, err := time.LoadLocation(f)
+	if err != nil {
+		// could be providing unknown TimeZone Location for example "Konoha"
+		return r
+	}
+
+	r = dt.In(loc).Format(time.RFC3339)
 
 	return r
 }

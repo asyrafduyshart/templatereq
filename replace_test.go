@@ -126,6 +126,14 @@ func TestFuncDESCBC(t *testing.T) {
 	funcDESCBC(r)
 }
 
+func TestReplaceFuncDESCBC(t *testing.T) {
+	a := replaceFuncWithValue(`$func("des-cbc:method=GetAllBetDetailsForTransactionID&Key=6E1556ABD55F44ECA802C512DBFAA0AE&Time=20231201160640&TransactionID=1765712:param:g9G16nTs:param:g9G16nTs")`)
+	b := replaceFuncWithValue(`$func("chain:prepend::method=GetAllBetDetailsForTransactionID&Key=6E1556ABD55F44ECA802C512DBFAA0AE&Time=20231201160640&TransactionID=1765712>>append::GgaIMaiNNtg>>append::20231201160640>>append::g9G16nTs>>encrypt::md5")`)
+
+	fmt.Printf("\na>>>%v\n", a)
+	fmt.Printf("\nb>>>%v\n", b)
+}
+
 func TestFuncMD5Base64(t *testing.T) {
 	r := "apple=2&mango=3&orange=1&strawberry=4"
 	funcBase64(r)
@@ -208,7 +216,17 @@ func TestFuncNormalizeDateWithAdjustment(t *testing.T) {
 }
 
 func TestFuncDateTimeFormat(t *testing.T) {
-	replaceFuncWithValue(`$func("chain:dateNow::Standard>>append:::format:>>encrypt::dateTimeFormat")`)
+	replaceFuncWithValue(`$func("chain:dateNow::Standard>>append:::format:RFC3339>>encrypt::dateTimeFormat")`)
+}
+
+func TestFuncDateTimeZoneFormat(t *testing.T) {
+	init := replaceFuncWithValue(`$func("chain:dateNow::Standard>>append:::format:America/Lima>>encrypt::dateTimeZoneFormat>>append:::format:2006-01-02T15:04:05>>encrypt::dateTimeFormat")`)
+	fmt.Printf("\nTestFuncDateTimeZoneFormat>>>%v\n", init)
+}
+
+func TestAESECB(t *testing.T) {
+	init := replaceFuncWithValue(`$func("aes-ecb:sometext:param:keywith16length!")`)
+	fmt.Printf("\nTestAESECB>>>%s\n", init)
 }
 
 func TestFuncNormalizeDateWithAdjustmentAndFormat(t *testing.T) {
