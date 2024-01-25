@@ -40,6 +40,7 @@ var functionMap = map[string]string{
 	"uppercase":          "uppercase",
 	"uuid":               "uuid",
 	"base64ToStr":        "base64ToStr",
+	"encodeBase64ToStr":  "encodeBase64ToStr",
 	"arrayPos":           "arrayPos",
 	"chain":              "chain",
 	"dateNow":            "dateNow",
@@ -135,6 +136,8 @@ func funcSwitch(f, v string) string {
 		return funcGenUUID()
 	case "base64ToStr":
 		return funcDecodeBase64ToStr(v)
+	case "encodeBase64ToStr":
+		return funcEncodeBase64ToStr(v)
 	case "chain":
 		return funcChaining(v)
 	case "arrayPos":
@@ -382,6 +385,14 @@ func funcDecodeBase64ToStr(str string) string {
 		return ""
 	}
 	return string(dcd[:])
+}
+
+func funcEncodeBase64ToStr(str string) string {
+	data := []byte(str)
+	dst := make([]byte, base64.StdEncoding.EncodedLen(len(data)))
+	base64.StdEncoding.Encode(dst, data)
+
+	return string(dst)
 }
 
 func funcChaining(v string) string {
