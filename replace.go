@@ -9,10 +9,13 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"hash/fnv"
+	"io"
 	"math"
 	"math/rand"
+	"net/http"
 	"net/url"
 	"regexp"
 	"sort"
@@ -23,6 +26,7 @@ import (
 	"github.com/andreburgaud/crypt2go/ecb"
 	"github.com/andreburgaud/crypt2go/padding"
 	"github.com/google/uuid"
+	"github.com/tidwall/gjson"
 )
 
 // function map
@@ -44,6 +48,7 @@ var functionMap = map[string]string{
 	"arrayPos":           "arrayPos",
 	"chain":              "chain",
 	"dateNow":            "dateNow",
+	"httpReq":            "httpReq",
 }
 
 // method map
@@ -144,6 +149,8 @@ func funcSwitch(f, v string) string {
 		return funcGetArrayPosition(v)
 	case "dateNow":
 		return funcDateNow(v)
+	case "httpReq":
+		return funcHttpReq(v)
 	default:
 		return v
 	}
@@ -484,6 +491,64 @@ func funcDateNow(v string) string {
 	default:
 		return v
 	}
+}
+
+func funcHttpReq(v string) string {
+	arr := strings.Split(v, "::")
+	method, url, headers, body, response := arr[0], arr[1], arr[2], arr[3], arr[4]
+
+	var Method string
+	var Headers map[string]string
+	var Body interface{}
+
+	switch strings.ToUpper(method) {
+	case "GET":
+		Method = http.MethodGet
+	case "POST":
+		Method = http.MethodPost
+	case "PUT":
+		Method = http.MethodPut
+	case "PATCH":
+		Method = http.MethodPatch
+	case "DELETE":
+		Method = http.MethodDelete
+	default:
+		Method = http.MethodGet
+	}
+
+	err := json.Unmarshal([]byte(headers), &Headers)
+	if err != nil {
+		return err.Error()
+	}
+
+	err = json.Unmarshal([]byte(body), &Body)
+	if err != nil {
+		Body = ""
+	}
+
+	ur := &URLReq{
+		Url:     url,
+		Body:    Body,
+		Method:  Method,
+		Headers: Headers,
+	}
+
+	resp, err := ur.RequestUrl()
+	if err != nil {
+		return err.Error()
+	}
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err.Error()
+	}
+
+	r := gjson.GetBytes(bodyBytes, response)
+	if r.Exists() {
+		return r.Str
+	}
+
+	return string(bodyBytes)
 }
 
 // ALL

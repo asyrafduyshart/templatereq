@@ -399,3 +399,16 @@ func TestGetDateNow(t *testing.T) {
 	server := replaceFuncWithValue(`$func("dateNow:Unix")`)
 	fmt.Println("SERVER_RESULT: ", server)
 }
+
+func TestHttpReqChain(t *testing.T) {
+	// # normal function
+	txt := `$func("httpReq:GET::https://pokeapi.co/api/v2/pokemon?offset=1&limit=1::{"Connection":"keep-alive"}::""::results.0.name")`
+	result := replaceFuncWithValue(txt)
+	fmt.Println(result)
+
+	// # with chain function
+	txt = `$func("chain:httpReq::GET::https://pokeapi.co/api/v2/pokemon?offset=1&limit=1::{"Connection":"keep-alive"}::""::results.0.name")`
+	result = replaceFuncWithValue(txt)
+	fmt.Println(result)
+
+}
