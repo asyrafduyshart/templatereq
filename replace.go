@@ -521,9 +521,14 @@ func funcHttpReq(v string) string {
 		return err.Error()
 	}
 
-	err = json.Unmarshal([]byte(body), &Body)
-	if err != nil {
-		Body = ""
+	switch Headers["Content-Type"] {
+	case "application/json":
+		Body = body
+	default:
+		err = json.Unmarshal([]byte(body), &Body)
+		if err != nil {
+			Body = ""
+		}
 	}
 
 	ur := &URLReq{
