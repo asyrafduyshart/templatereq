@@ -125,7 +125,7 @@ func TestFuncSha256(t *testing.T) {
 }
 
 func TestFuncDESCBC(t *testing.T) {
-	r := "stringToEncrypt:keystring:ivstring"
+	r := "stringToEncrypt:param:keystring:param:ivstring"
 	funcDESCBC(r)
 }
 
