@@ -27,28 +27,36 @@ import (
 	"github.com/andreburgaud/crypt2go/padding"
 	"github.com/google/uuid"
 	"github.com/tidwall/gjson"
+
+	cr "github.com/asyrafduyshart/templatereq/cryptography"
 )
 
 // function map
 var functionMap = map[string]string{
-	"hash":               "hash",
-	"base64":             "base64",
-	"sha256":             "sha256",
-	"aes-ecb":            "aes-ecb",
-	"des-cbc":            "des-cbc",
-	"dateOffset":         "dateOffset",
-	"dateTimeFormat":     "dateTimeFormat",
-	"dateTimeZoneFormat": "dateTimeZoneFormat",
-	"dateFormat":         "dateFormat",
-	"lowercase":          "lowercase",
-	"uppercase":          "uppercase",
-	"uuid":               "uuid",
-	"base64ToStr":        "base64ToStr",
-	"encodeBase64ToStr":  "encodeBase64ToStr",
-	"arrayPos":           "arrayPos",
-	"chain":              "chain",
-	"dateNow":            "dateNow",
-	"httpReq":            "httpReq",
+	"hash":                          "hash",
+	"base64":                        "base64",
+	"sha256":                        "sha256",
+	"aes-ecb":                       "aes-ecb",
+	"des-cbc":                       "des-cbc",
+	"dateOffset":                    "dateOffset",
+	"dateTimeFormat":                "dateTimeFormat",
+	"dateTimeZoneFormat":            "dateTimeZoneFormat",
+	"dateFormat":                    "dateFormat",
+	"lowercase":                     "lowercase",
+	"uppercase":                     "uppercase",
+	"uuid":                          "uuid",
+	"base64ToStr":                   "base64ToStr",
+	"encodeBase64ToStr":             "encodeBase64ToStr",
+	"arrayPos":                      "arrayPos",
+	"chain":                         "chain",
+	"dateNow":                       "dateNow",
+	"httpReq":                       "httpReq",
+	"genAesKey":                     "genAesKey",
+	"encKeyDataPublicRsa":           "encKeyDataPublicRsa",
+	"aesPkcs5":                      "aesPkcs5",
+	"base64DecodeAndPrivKeyDecrypt": "base64DecodeAndPrivKeyDecrypt",
+	"base64DecodeAndDecrypt":        "base64DecodeAndDecrypt",
+	"gjson":                         "gjson",
 }
 
 // method map
@@ -151,6 +159,18 @@ func funcSwitch(f, v string) string {
 		return funcDateNow(v)
 	case "httpReq":
 		return funcHttpReq(v)
+	case "genAesKey":
+		return funcGenerateAesKey(v)
+	case "encKeyDataPublicRsa":
+		return funcPublicKeyEncryptAndBase64(v, "", "")
+	case "aesPkcs5":
+		return funcEncryptAndBase64PKCS5(v, "")
+	case "base64DecodeAndPrivKeyDecrypt":
+		return funcBase64DecodeAndPrivateKeyDecrypt(v, "")
+	case "base64DecodeAndDecrypt":
+		return funcBase64DecodeAndDecrypt(v, "")
+	case "gjson":
+		return funcGetDataWithGJSON(v)
 	default:
 		return v
 	}
@@ -554,6 +574,116 @@ func funcHttpReq(v string) string {
 	}
 
 	return string(bodyBytes)
+}
+
+func funcGenerateAesKey(v string) string {
+	length, _ := strconv.Atoi(v)
+	chars := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+	var key string
+	seed := time.Now().UnixNano()
+	rng := rand.New(rand.NewSource(seed))
+	for i := 0; i < length; i++ {
+		key += string(chars[rng.Intn(len(chars))])
+	}
+	return key
+}
+
+func funcPublicKeyEncryptAndBase64(v string, aesKey string, publicKey string) string {
+
+	ak := funcGenerateAesKey("16")
+	pk := publicKey
+
+	if aesKey == "" && publicKey == "" {
+		arr := strings.Split(v, ":param:")
+		ak = arr[0]
+		pk = strings.ReplaceAll(arr[1], "\\n", "\n")
+
+	}
+
+	key, err := cr.PublicKeyEncryptAndBase64([]byte(ak), []byte(pk))
+
+	if err != nil {
+		return ""
+	}
+
+	return key
+}
+
+func funcEncryptAndBase64PKCS5(v string, aesKey string) string {
+
+	ak := funcGenerateAesKey("16")
+	jsonString := v
+
+	var jsonData map[string]interface{}
+
+	if aesKey == "" {
+		arr := strings.Split(v, ":param:")
+		jsonString = arr[0]
+		ak = arr[1]
+	}
+
+	err := json.Unmarshal([]byte(jsonString), &jsonData)
+
+	if err != nil {
+		return err.Error()
+	}
+
+	jsonDataByte, err := json.Marshal(jsonData)
+
+	if err != nil {
+		return err.Error()
+	}
+
+	data := cr.EncryptAndBase64PKCS5(jsonDataByte, []byte(ak))
+
+	return data
+}
+
+func funcBase64DecodeAndPrivateKeyDecrypt(v string, privateKey string) string {
+	ct := v
+	pk := privateKey
+
+	if privateKey == "" {
+		arr := strings.Split(v, ":param:")
+		ct = arr[0]
+		pk = strings.ReplaceAll(arr[1], "\\n", "\n")
+	}
+
+	data, err := cr.Base64DecodeAndPrivateKeyDecrypt(ct, []byte(pk))
+
+	if err != nil {
+		return v
+	}
+
+	return string(data)
+}
+
+func funcBase64DecodeAndDecrypt(v string, aesKey string) string {
+	ct := v
+	ak := aesKey
+
+	if aesKey == "" {
+		arr := strings.Split(v, ":param:")
+		ct = arr[0]
+		ak = arr[1]
+	}
+
+	data, err := cr.Base64DecodeAndDecrypt(ct, []byte(ak))
+
+	if err != nil {
+		return v
+	}
+
+	return string(data)
+}
+
+func funcGetDataWithGJSON(v string) string {
+	arr := strings.Split(v, ":param:")
+
+	data := arr[0]
+	key := arr[1]
+
+	return gjson.GetBytes([]byte(data), key).Str
 }
 
 // ALL

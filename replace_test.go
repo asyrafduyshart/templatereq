@@ -1,11 +1,14 @@
 package templatereq
 
 import (
+	"encoding/json"
 	"fmt"
+	"regexp"
 	"strings"
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/tidwall/gjson"
 )
 
 var (
@@ -411,4 +414,95 @@ func TestHttpReqChain(t *testing.T) {
 	result = replaceFuncWithValue(txt)
 	fmt.Println(result)
 
+}
+
+func TestEncryptKeyDataWithPublicKeyRSA(t *testing.T) {
+
+	TransactionData := map[string]string{
+		"TIMESTAMP": `1719044974`,
+	}
+
+	values := []string{
+
+		// 01. Scripting Constant Variable
+		"API_URL_DOMAIN=https://pokeapi.co/api/v2/pokemon",
+
+		// 02. Scripting Variable
+		"TIMESTAMP=#TIMESTAMP",
+
+		// 03. Scripting Function
+		`AES_KEY=$func("genAesKey:16")`,
+
+		// 04. Scripting Function that could utilize 01 & 02 & 03 Values
+		`RESULT=~$func("chain:append::AES_KEY>>append:::param:TIMESTAMP>>append::API_URL_DOMAIN")`,
+	}
+
+	// Now we simulate
+
+	BodyParamsNew := make(map[string]string)
+	body, _ := json.Marshal(TransactionData)
+	bodyKeys := []string{}
+
+	for _, v := range values {
+		vals := strings.SplitN(v, "=", 2)
+		k := vals[0]
+		val := vals[1]
+
+		fr := val[0:1]
+
+		// store the keys for reusable purpose
+		bodyKeys = append(bodyKeys, k)
+
+		if fr == "#" {
+			r := gjson.GetBytes(body, val[1:])
+			if r.Exists() {
+				BodyParamsNew[k] = r.Str
+			}
+			continue
+		}
+
+		// skipping if the value will be getting from response
+		if fr == "@" {
+			continue
+		}
+
+		// flagging to start find value inside rplc
+		if fr == "%" {
+			continue
+		}
+
+		// replace val using templateReq library
+		if fr == "$" {
+			BodyParamsNew[k] = Replace(val, nil)
+			continue
+		}
+
+		// run scripting using all previous value
+		if fr == "~" {
+			data := val[1:]
+			for _, v2 := range bodyKeys {
+				pattern := regexp.MustCompile(v2)
+				data = pattern.ReplaceAllStringFunc(data, func(match string) string {
+					if BodyParamsNew[v2] != "" {
+						return BodyParamsNew[v2]
+					}
+					return match
+				})
+
+			}
+			BodyParamsNew[k] = Replace(data, nil)
+			continue
+		}
+
+		BodyParamsNew[k] = val
+
+	}
+
+	fmt.Println()
+
+	result := Replace(`$RESULT `, BodyParamsNew)
+	fmt.Println()
+
+	fmt.Println("RESULT: ", result)
+	fmt.Println()
 }
