@@ -1,9 +1,7 @@
 package templatereq
 
 import (
-	"encoding/json"
 	"fmt"
-	"regexp"
 	"strings"
 	"testing"
 
@@ -416,104 +414,20 @@ func TestHttpReqChain(t *testing.T) {
 
 }
 
-func TestRsaEncryptionAndDecryption(t *testing.T) {
+func TestRsaEncryptionAndDecryptionRsa(t *testing.T) {
 
-	JsonData := map[string]string{
-		"TIMESTAMP": `1719044974`,
+	privateKeyTxt := "\n-----BEGIN RSA PRIVATE KEY-----\nMIICXAIBAAKBgQCSDtRYopGlCeAxa9jSqQ524Erf/iwv1vlkg2pqoRhOlJ3Q0Esm\nKC5h69pCdu0Bwn+azc2kZI6a4Yi7BNfombHWZnI+RuLi2r2ek5q0FmRkG7Yhd99M\nXlngKyfVP2hlSQiedR9nep9g4ty79xAcroC6rY4oy4nCKD1Cxc6VZNnRzQIDAQAB\nAoGAVOLrhQwOy7V+qBp+7Ig2kN5whdhKRA+T6Ff8XDZ+UwVK51Z3ppiJxH1331MR\nEgnBce4Ui2up+dgESHVbKqNQ2F60Wyxdwp6hviffZUFpW09TuyDOlWI242JXoX4T\nwocGPIArEerTFG0uxEbh0RFmIhSjyfDx9KRRTnNM80MtIWECQQDqyuZc6puOs+P6\njzvf5glqwLVIXaMXzSQQyvaPXKOrmIo3L3lCh6QF6/BZk/1J0WygDUG8mjaizij7\nOT+8AP95AkEAn0AfH1zaZ+T/3/LelwgGQZVCwMqvSR2JcBH1JRQpDCY8zssUAzfE\n0a50fDVDLMwnxVi/LxAy6kVgseMnidwr9QJAJu2xOCKl3AkzeW2aLctEMHD3HaJ4\n0g9vNWGRc7+WW3MVJ4U1g7Rdm6W82f1Rd5XDft3z0kN3X5Ly9IRPbupzcQJACvf9\nrMlWecV6IlC2KCzzUV0YhfLv89dG+iMigXVMBnwzwAKY1EfpFJAxkcSRZeqB6sPc\nFz/EYgJ5UIdW19YEaQJBAKvSQW5R+5FdQJSq0Tf2cag1qfeDXKLItAo3Cqf6qr5H\nEK3Rx3KAJtAVyrmxbs76D5ouKJZ1f1lkez2y0pwrijU=\n-----END RSA PRIVATE KEY-----"
+	publicKeyTxt := "\n-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCSDtRYopGlCeAxa9jSqQ524Erf\n/iwv1vlkg2pqoRhOlJ3Q0EsmKC5h69pCdu0Bwn+azc2kZI6a4Yi7BNfombHWZnI+\nRuLi2r2ek5q0FmRkG7Yhd99MXlngKyfVP2hlSQiedR9nep9g4ty79xAcroC6rY4o\ny4nCKD1Cxc6VZNnRzQIDAQAB\n-----END PUBLIC KEY-----"
+
+	aesKeyTxt := replaceFuncWithValue(`$func("genAesKey:16")`)
+	encKey := replaceFuncWithValue(`$func("chain:append::` + aesKeyTxt + `>>append:::param:` + publicKeyTxt + `>>encrypt::encKeyDataPublicRsa")`)
+	encData := replaceFuncWithValue(`$func("chain:append::{"data": "hello world"}>>append:::param:` + aesKeyTxt + `>>encrypt::aesPkcs5")`)
+
+	decKey := replaceFuncWithValue(`$func("chain:base64DecodeAndPrivKeyDecrypt::` + encKey + `:param:` + privateKeyTxt + `")`)
+	decData := replaceFuncWithValue(`$func("chain:base64DecodeAndDecrypt::` + encData + `:param:` + decKey + `")`)
+
+	if gjson.GetBytes([]byte(decData), "data").Str != `hello world` {
+		t.Errorf("result from decode data failed !")
 	}
-
-	values := []string{
-
-		// 01. Scripting Constant Variable
-		"API_URL_DOMAIN=https://pokeapi.co/api/v2/pokemon",
-		"PRIVATE_RSA_KEY=\n-----BEGIN RSA PRIVATE KEY-----\nMIICXAIBAAKBgQCSDtRYopGlCeAxa9jSqQ524Erf/iwv1vlkg2pqoRhOlJ3Q0Esm\nKC5h69pCdu0Bwn+azc2kZI6a4Yi7BNfombHWZnI+RuLi2r2ek5q0FmRkG7Yhd99M\nXlngKyfVP2hlSQiedR9nep9g4ty79xAcroC6rY4oy4nCKD1Cxc6VZNnRzQIDAQAB\nAoGAVOLrhQwOy7V+qBp+7Ig2kN5whdhKRA+T6Ff8XDZ+UwVK51Z3ppiJxH1331MR\nEgnBce4Ui2up+dgESHVbKqNQ2F60Wyxdwp6hviffZUFpW09TuyDOlWI242JXoX4T\nwocGPIArEerTFG0uxEbh0RFmIhSjyfDx9KRRTnNM80MtIWECQQDqyuZc6puOs+P6\njzvf5glqwLVIXaMXzSQQyvaPXKOrmIo3L3lCh6QF6/BZk/1J0WygDUG8mjaizij7\nOT+8AP95AkEAn0AfH1zaZ+T/3/LelwgGQZVCwMqvSR2JcBH1JRQpDCY8zssUAzfE\n0a50fDVDLMwnxVi/LxAy6kVgseMnidwr9QJAJu2xOCKl3AkzeW2aLctEMHD3HaJ4\n0g9vNWGRc7+WW3MVJ4U1g7Rdm6W82f1Rd5XDft3z0kN3X5Ly9IRPbupzcQJACvf9\nrMlWecV6IlC2KCzzUV0YhfLv89dG+iMigXVMBnwzwAKY1EfpFJAxkcSRZeqB6sPc\nFz/EYgJ5UIdW19YEaQJBAKvSQW5R+5FdQJSq0Tf2cag1qfeDXKLItAo3Cqf6qr5H\nEK3Rx3KAJtAVyrmxbs76D5ouKJZ1f1lkez2y0pwrijU=\n-----END RSA PRIVATE KEY-----",
-		"PUBLIC_KEY=\n-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCSDtRYopGlCeAxa9jSqQ524Erf\n/iwv1vlkg2pqoRhOlJ3Q0EsmKC5h69pCdu0Bwn+azc2kZI6a4Yi7BNfombHWZnI+\nRuLi2r2ek5q0FmRkG7Yhd99MXlngKyfVP2hlSQiedR9nep9g4ty79xAcroC6rY4o\ny4nCKD1Cxc6VZNnRzQIDAQAB\n-----END PUBLIC KEY-----",
-
-		// 02. Scripting Variable
-		"TIMESTAMP=#TIMESTAMP",
-
-		// 03. Scripting Function
-		`AES_KEY=$func("genAesKey:16")`,
-
-		// 04. Scripting FFunction
-		`ENCRYPTION_KEY=~$func("chain:append::AES_KEY>>append:::param:PUBLIC_KEY>>encrypt::encKeyDataPublicRsa")`,
-		`ENCRYPTION_DATA=~$func("chain:append::{"data": "hello world"}>>append:::param:AES_KEY>>encrypt::aesPkcs5")`,
-		`DECRYPTION_KEY=~$func("chain:base64DecodeAndPrivKeyDecrypt::ENCRYPTION_KEY:param:PRIVATE_RSA_KEY")`,
-		`DECRYPTION_DATA=~$func("chain:base64DecodeAndDecrypt::ENCRYPTION_DATA:param:DECRYPTION_KEY")`,
-
-		// 05. Scripting Function that could utilize 01,02,03,04 Values
-		`JOINING=~$func("chain:append::{"AES_KEY","TIMESTAMP","API_URL_DOMAIN"}")`,
-	}
-
-	// Now we start simulation :)
-	BodyParamsNew := make(map[string]string)
-	body, _ := json.Marshal(JsonData)
-	bodyKeys := []string{}
-
-	for _, v := range values {
-		vals := strings.SplitN(v, "=", 2)
-		k := vals[0]
-		val := vals[1]
-
-		fr := val[0:1]
-
-		// store the keys for reusable purpose
-		bodyKeys = append(bodyKeys, k)
-
-		if fr == "#" {
-			r := gjson.GetBytes(body, val[1:])
-			if r.Exists() {
-				BodyParamsNew[k] = r.Str
-			}
-			continue
-		}
-
-		// skipping if the value will be getting from response
-		if fr == "@" {
-			continue
-		}
-
-		// flagging to start find value inside rplc
-		if fr == "%" {
-			continue
-		}
-
-		// replace val using templateReq library
-		if fr == "$" {
-			BodyParamsNew[k] = Replace(val, nil)
-			continue
-		}
-
-		// run scripting using all previous value
-		if fr == "~" {
-			data := val[1:]
-			for _, v2 := range bodyKeys {
-				pattern := regexp.MustCompile(v2)
-				data = pattern.ReplaceAllStringFunc(data, func(match string) string {
-					if BodyParamsNew[v2] != "" {
-						return BodyParamsNew[v2]
-					}
-					return match
-				})
-
-			}
-			BodyParamsNew[k] = Replace(data, nil)
-			continue
-		}
-
-		BodyParamsNew[k] = val
-
-	}
-
-	fmt.Println()
-
-	rsa := Replace(`$DECRYPTION_DATA `, BodyParamsNew)
-	join := Replace(`$JOINING `, BodyParamsNew)
-
-	fmt.Println()
-
-	fmt.Println("1. RSA DECRYPT & ENCRYPT: ", rsa)
-	fmt.Println("2. JOIN VALUES: ", join)
-	fmt.Println()
 
 }
