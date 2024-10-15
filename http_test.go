@@ -51,7 +51,7 @@ func TestUrlRequestWithTimeOutError(t *testing.T) {
 		return
 	}
 	if resp.StatusCode >= 200 {
-		t.Errorf("got %v, want %v", "failed", "success")
+		t.Errorf("got %v, want %v", "success", "error timeout")
 	}
 
 }
