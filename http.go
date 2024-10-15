@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"reflect"
 	"strings"
+	"time"
 )
 
 type URLReq struct {
@@ -20,17 +21,29 @@ type URLReq struct {
 
 func (ur *URLReq) RequestUrl() (*http.Response, error) {
 
+	duration := 5000 * time.Millisecond
+
+	// Check if a timeout header is specified
+	if timeout, ok := ur.Headers["TimeoutDuration"]; ok && timeout != "" {
+		var val, err = time.ParseDuration(timeout)
+		if err == nil {
+			duration = time.Duration(val.Milliseconds())
+		}
+	}
+
+	client := &http.Client{
+		Timeout: duration,
+	}
+
 	// JSON
 	switch t := ur.Body.(type) {
 	case string:
-		client := &http.Client{}
 		r, _ := http.NewRequest(ur.Method, ur.Url, bytes.NewBuffer([]byte(t))) // JSON payload
 		for k, e := range ur.Headers {
 			r.Header.Add(k, e)
 		}
 		return client.Do(r)
 	case map[string]interface{}:
-		client := &http.Client{}
 		data := url.Values{}
 		for i, n := range t {
 			data.Set(i, fmt.Sprintf("%v", n))
