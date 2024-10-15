@@ -27,9 +27,11 @@ func (ur *URLReq) RequestUrl() (*http.Response, error) {
 	if timeout, ok := ur.Headers["TimeoutDuration"]; ok && timeout != "" {
 		var val, err = time.ParseDuration(timeout)
 		if err == nil {
-			duration = time.Duration(val.Milliseconds())
+			duration = val
 		}
 	}
+
+	fmt.Println("duration", duration)
 
 	client := &http.Client{
 		Timeout: duration,
