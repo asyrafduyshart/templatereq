@@ -31,8 +31,6 @@ func (ur *URLReq) RequestUrl() (*http.Response, error) {
 		}
 	}
 
-	fmt.Println("duration", duration)
-
 	client := &http.Client{
 		Timeout: duration,
 	}
