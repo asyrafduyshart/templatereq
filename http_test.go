@@ -41,7 +41,7 @@ func TestUrlRequestWithTimeOutError(t *testing.T) {
 		Method: http.MethodPost,
 		Headers: map[string]string{
 			"Accept":          "application/json",
-			"Request-Timeout": "4s",
+			"Request-Timeout": "3",
 		},
 	}
 

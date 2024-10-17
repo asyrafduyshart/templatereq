@@ -25,7 +25,7 @@ func (ur *URLReq) RequestUrl() (*http.Response, error) {
 
 	// Check if a timeout header is specified
 	if timeout, ok := ur.Headers["Request-Timeout"]; ok && timeout != "" {
-		var val, err = time.ParseDuration(timeout)
+		var val, err = time.ParseDuration(timeout + "s")
 		if err == nil {
 			duration = val
 		}
