@@ -36,12 +36,12 @@ func TestUrlRequest(t *testing.T) {
 
 func TestUrlRequestWithTimeOutError(t *testing.T) {
 	ur := &URLReq{
-		Url:    "https://httpbin.org/post",
+		Url:    "https://httpbin.org/delay/5",
 		Body:   `{"hello": "there"}`,
 		Method: http.MethodPost,
 		Headers: map[string]string{
 			"Accept":          "application/json",
-			"TimeoutDuration": "50ms",
+			"Request-Timeout": "4s",
 		},
 	}
 
