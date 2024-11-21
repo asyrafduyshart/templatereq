@@ -431,3 +431,50 @@ func TestRsaEncryptionAndDecryptionRsa(t *testing.T) {
 	}
 
 }
+
+func TestConvertingXMLtoJSON(t *testing.T) {
+	txt := `
+		<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+		<result>
+			<row countrycode="country123456789" postalcode="postal123456789" type="mail" status="Success"/>
+		</result>`
+	result := funcXMLtoJSONstr(txt)
+	txt = result + ":param:" + "result.row.-postalcode"
+	txt = funcGetDataWithGJSON(txt)
+	fmt.Println(txt)
+}
+
+func TestGetJsonRaw(t *testing.T) {
+	jsonStr := `{
+		"user": {
+			"id": 12345,
+			"name": "John Doe",
+			"email": "johndoe@example.com",
+			"address": {
+				"street": "123 Main St",
+				"city": "Springfield",
+				"state": "IL",
+				"zipcode": "62701"
+			},
+			"orders": [
+				{
+					"order_id": 9876,
+					"date": "2024-11-01",
+					"total_price": 919.98
+				},
+				{
+					"order_id": 9877,
+					"date": "2024-11-15",
+					"total_price": 499.99
+				}
+			]
+		}
+	}`
+
+	init := "12345"
+	expect := funcGetDataWithGJSON(jsonStr + ":param:" + "user.id:param:raw")
+
+	if expect != init {
+		t.Errorf("got %v, want %v", "''", init)
+	}
+}
