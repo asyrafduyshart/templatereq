@@ -440,8 +440,13 @@ func TestConvertingXMLtoJSON(t *testing.T) {
 		</result>`
 	result := funcXMLtoJSONstr(txt)
 	txt = result + ":param:" + "result.row.-postalcode"
-	txt = funcGetDataWithGJSON(txt)
-	fmt.Println(txt)
+
+	init := "postal123456789"
+	expect := funcGetDataWithGJSON(txt)
+
+	if expect != init {
+		t.Errorf("got %v, want %v", "''", init)
+	}
 }
 
 func TestGetJsonRaw(t *testing.T) {
