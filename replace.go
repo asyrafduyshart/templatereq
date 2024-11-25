@@ -29,6 +29,7 @@ import (
 	"github.com/tidwall/gjson"
 
 	cr "github.com/asyrafduyshart/templatereq/cryptography"
+	xj "github.com/basgys/goxml2json"
 )
 
 // function map
@@ -57,6 +58,7 @@ var functionMap = map[string]string{
 	"base64DecodeAndPrivKeyDecrypt": "base64DecodeAndPrivKeyDecrypt",
 	"base64DecodeAndDecrypt":        "base64DecodeAndDecrypt",
 	"gjson":                         "gjson",
+	"xmlToJsonStr":                  "xmlToJsonStr",
 }
 
 // method map
@@ -171,6 +173,8 @@ func funcSwitch(f, v string) string {
 		return funcBase64DecodeAndDecrypt(v, "")
 	case "gjson":
 		return funcGetDataWithGJSON(v)
+	case "xmlToJsonStr":
+		return funcXMLtoJSONstr(v)
 	default:
 		return v
 	}
@@ -683,7 +687,20 @@ func funcGetDataWithGJSON(v string) string {
 	data := arr[0]
 	key := arr[1]
 
+	if len(arr) > 2 && arr[2] == "raw" {
+		return gjson.GetBytes([]byte(data), key).Raw
+	}
+
 	return gjson.GetBytes([]byte(data), key).Str
+}
+
+func funcXMLtoJSONstr(v string) string {
+	xm := strings.NewReader(v)
+	js, err := xj.Convert(xm)
+	if err != nil {
+		return err.Error()
+	}
+	return js.String()
 }
 
 // ALL
