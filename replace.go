@@ -81,8 +81,9 @@ const (
 
 // date type
 const (
-	Unix     string = "Unix"
-	Standard string = "Standard"
+	Unix      string = "Unix"
+	UnixMilli string = "UnixMilli"
+	Standard  string = "Standard"
 )
 
 func replaceByMap(t string, v map[string]string) string {
@@ -510,6 +511,8 @@ func funcDateNow(v string) string {
 	switch v {
 	case Unix:
 		return GetDateNowUnix()
+	case UnixMilli:
+		return GetDateNowUnixMilli()
 	case Standard:
 		return time.Now().Format(time.RFC3339)
 	default:
