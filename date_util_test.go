@@ -31,3 +31,8 @@ func TestDateTimeOffset(t *testing.T) {
 	date := replaceFuncWithValue(`$func("dateOffset:::subtract:60*60*4:format:Dtmz")`)
 	fmt.Println(date)
 }
+
+func TestGetDateNowInUnixMilli(t *testing.T) {
+	date := replaceFuncWithValue(`$func("dateNow:UnixMilli")`)
+	fmt.Println(date)
+}

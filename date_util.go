@@ -218,3 +218,7 @@ func formatYYMMDD(v time.Time) string {
 func GetDateNowUnix() string {
 	return strconv.Itoa(int(time.Now().Unix()))
 }
+
+func GetDateNowUnixMilli() string {
+	return strconv.Itoa(int(time.Now().UnixMilli()))
+}
