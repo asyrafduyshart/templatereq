@@ -483,3 +483,29 @@ func TestGetJsonRaw(t *testing.T) {
 		t.Errorf("got %v, want %v", "''", init)
 	}
 }
+
+func TestFuncHmacSHA256(t *testing.T) {
+	plaintext := "plaintext"
+	secret := "superstrongsecret"
+
+	expected := "0d96381b4c465ea51d0361f6f8a9765c647d3bac44b402da559bedeb2c6a60a6"
+	actual := funcHmacSHA256(plaintext, secret)
+
+	if actual != expected {
+		t.Errorf(
+			"funcHmacSHA256(%q, %q) = %q; want %q",
+			plaintext, secret, actual, expected,
+		)
+	}
+}
+
+func TestFuncHmacSHA256FromTemplate(t *testing.T) {
+	expected := "0d96381b4c465ea51d0361f6f8a9765c647d3bac44b402da559bedeb2c6a60a6"
+	actual := replaceFuncWithValue(`$func("chain:hmacsha256::superstrongsecret:param:plaintext")`)
+	if actual != expected {
+		t.Errorf(
+			"funcHmacSHA256FromTemplate = %q; want %q", actual, expected,
+		)
+	}
+
+}
