@@ -5,6 +5,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/des"
+	"crypto/hmac"
 	"crypto/md5"
 	"crypto/sha256"
 	"encoding/base64"
@@ -37,6 +38,7 @@ var functionMap = map[string]string{
 	"hash":                          "hash",
 	"base64":                        "base64",
 	"sha256":                        "sha256",
+	"hmacsha256":                    "hmacsha256",
 	"aes-ecb":                       "aes-ecb",
 	"des-cbc":                       "des-cbc",
 	"dateOffset":                    "dateOffset",
@@ -132,6 +134,8 @@ func funcSwitch(f, v string) string {
 		return funcBase64(v)
 	case "sha256":
 		return funcSha256(v)
+	case "hmacsha256":
+		return funcHmacSHA256(v, "")
 	case "aes-ecb":
 		return funcAESECB(v)
 	case "des-cbc":
@@ -381,6 +385,24 @@ func funcMd5(text string) string {
 func funcSha256(text string) string {
 	hash := sha256.Sum256([]byte(text))
 	return hex.EncodeToString(hash[:])
+}
+
+func funcHmacSHA256(message string, secret string) string {
+
+	key := secret
+	data := message
+
+	if secret == "" {
+		arr := strings.Split(message, ":param:")
+		key = arr[0]
+		data = arr[1]
+	}
+
+	h := hmac.New(sha256.New, []byte(key))
+	h.Write([]byte(data))
+
+	signature := h.Sum(nil)
+	return hex.EncodeToString(signature)
 }
 
 func funcEncrToLowerCase(text string) string {
