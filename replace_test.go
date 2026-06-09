@@ -509,3 +509,28 @@ func TestFuncHmacSHA256FromTemplate(t *testing.T) {
 	}
 
 }
+func TestFuncPbkdf2(t *testing.T) {
+	payload := `{"username":"usernametest","password":"passwordtest"}`
+	secret := "asdsecret"
+
+	expected := "HcLng8SNzWH+T8hkLKgggEJZmb8Pc1jCmKEKVjz5X+fBKHzKV1aT5RcZgXvqBiy96OxKkUH0KPNl0ZOTUD84WA=="
+	actual := funcPbkdf2(payload, secret)
+
+	if actual != expected {
+		t.Errorf(
+			"funcPbkdf2(%q, %q) = %q; want %q",
+			payload, secret, actual, expected,
+		)
+	}
+}
+
+func TestFuncPbkdf2FromTemplate(t *testing.T) {
+	expected := "HcLng8SNzWH+T8hkLKgggEJZmb8Pc1jCmKEKVjz5X+fBKHzKV1aT5RcZgXvqBiy96OxKkUH0KPNl0ZOTUD84WA=="
+	actual := replaceFuncWithValue(`$func("chain:pbkdf2::{"username":"usernametest","password":"passwordtest"}:param:asdsecret")`)
+	if actual != expected {
+		t.Errorf(
+			"funcPbkdf2FromTemplate = %q; want %q", actual, expected,
+		)
+	}
+
+}
