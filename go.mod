@@ -7,6 +7,7 @@ require (
 	github.com/basgys/goxml2json v1.1.0
 	github.com/google/uuid v1.3.0
 	github.com/tidwall/gjson v1.17.0
+	golang.org/x/crypto v0.18.0
 )
 
 require (

@@ -7,7 +7,6 @@ import (
 	"crypto/des"
 	"crypto/hmac"
 	"crypto/md5"
-	"crypto/pbkdf2"
 	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/base64"
@@ -30,6 +29,7 @@ import (
 	"github.com/andreburgaud/crypt2go/padding"
 	"github.com/google/uuid"
 	"github.com/tidwall/gjson"
+	"golang.org/x/crypto/pbkdf2"
 
 	cr "github.com/asyrafduyshart/templatereq/cryptography"
 	xj "github.com/basgys/goxml2json"
@@ -418,17 +418,13 @@ func funcPbkdf2(password string, salt string) string {
 		salt = arr[1]
 	}
 
-	hash, err := pbkdf2.Key(
-		sha512.New,
-		password,
+	hash := pbkdf2.Key(
+		[]byte(password),
 		[]byte(salt),
 		1000,
 		64,
+		sha512.New,
 	)
-
-	if err != nil {
-		return err.Error()
-	}
 
 	return base64.StdEncoding.EncodeToString(hash)
 }
